@@ -1,0 +1,6 @@
+# To find your key, log onto learn.vqu.edu, go to your profile settings,
+# and select the 'API Keys' tab.
+
+ALPHA_API_KEY = "280e422481e75d84c79b470bd169fa553f9a8e691c13470955e6946314a8b4ad05d7f6819aef31e8bb9979ad9ae8656072ae81886d2c884a79cfd358fccf8ace73d651a6d4f5e8efb773089aa05c03df9eaf6958c3db80261c58e4df40f70a47e414cf8188b09c59b2552f705f008bacfb317f5e5d280ddafe5d3ac207e756a5"
+DB_NAME = "stocks.sqlite"
+MODEL_DIRECTORY = "models"

@@ -1,0 +1,40 @@
+
+select *from gnmt_policy where v_policy_no='UI202000594821';
+
+
+select v_policy_no,d_prem_due_date,d_next_out_date,v_cntr_stat_code,v_cntr_prem_stat_code from gnmt_policy where v_policy_no='UI202000594821';
+
+select v_policy_no,d_prem_due_date,d_next_due_date,v_cntr_stat_code,v_cntr_prem_stat_code from gnmt_policy_detail where v_policy_no='UI202000594821';
+
+
+select *from gndt_bill_ind_dets where v_policy_no='UI202000594821' order by 4 desc;
+
+select *from ppmt_outstanding_premium where v_policy_no='UI202000594821'
+and v_status<> 'R' order by 3;
+select sum(n_amount) from ppmt_outstanding_premium where v_policy_no='UI202000594821' and v_status= 'I'; --7800000
+
+select  sum(n_amount) from ppmt_outstanding_premium where v_policy_no='UI202000594821' and v_status= 'A'; --1200000
+
+select sum(n_receipt_amt) from remt_receipt where v_receipt_table='DETAIL' and v_policy_no='UI202000594821' and v_receipt_status='RE001'; --7500000
+
+select 8000000 - 7800000 from dual;--200000
+
+select 200000-1200000 from dual;--1606
+
+select *from ppmt_overshort_payment where v_policy_no='UI202000594821';--243796
+
+select *from ppdt_overshort_payment_det where v_policy_no='UI202000594821' order by 5;--DEP271140
+
+select *from gndt_bill_ind_dets_trans where v_ref_no='HQ230195492';   --DN1942147
+
+select *from gndt_bill_ind_dets_trans where v_bill_no='DN1973159';  --HQ240043652
+
+select *From remt_receipt where v_receipt_table='DETAIL' and v_policy_no='UI202000594821' order by d_receipt_date;
+
+select *from gndt_bill_trans where v_bill_no='DN1973159' order by n_bill_trn_no;
+
+select *from pydt_voucher_policy_client where v_policy_no='UI202000594821';
+
+select *from gnmm_batch_list order by 1;
+
+

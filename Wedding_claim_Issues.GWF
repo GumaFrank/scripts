@@ -1,0 +1,427 @@
+"REM WORKSPACETAB0",Query1,,3
+UG202300901250
+UG202401156801
+UG202401103376
+"REM WORKSPACETAB1",Query5,,1
+SELECT * FROM AMMT_AGENT_BENEFIT_POOL WHERE n_agent_no ='4022';
+"REM WORKSPACETAB2",Query2,,1
+select * from AMMT_POL_COMM_DETAIL where V_POLICY_NO ='UG202300901250';--commission for this agnet is not moved to benefit pool
+"REM WORKSPACETAB3",Query3,,1
+select * from GNMM_BATCH_LIST order by 1;
+"REM WORKSPACETAB4",Query4,,4
+select  tname from tab where tname like '%BENEFIT%';
+
+
+--select * from GNMT_BATCH_EXE_TRACE where n_batch_no ='47.2' order by 1 desc ;
+"REM WORKSPACETAB5",Query6,,3
+select  * from GNMT_POLICY_EVENT_LINK   where V_POLICY_NO ='UI201900445154';
+
+---UI201800359386
+"REM WORKSPACETAB6",WEDDING,,12
+
+
+select  rowid, a. * from GNMT_POLICY_EVENT_LINK  a  where V_POLICY_NO in ('UI201900460462','UI201900445154');   ---UI201900460462
+
+SELECT ROWID, A. * FROM gnmm_quot_backup A where V_POLICY_NO IN
+ ('UI201800359386');
+ /
+
+ SELECT ROWID, A. * FROM gnmt_quot_backup_dtl A where N_BACKUP_REF_NO IN (1050458,1104775); -- A.V_POLICY_NO IN
+-- ('UI201900445154','UI201900434584');
+
+SELECT ROWID, A. * FROM gnmm_quot_backup A where V_POLICY_NO IN ('UI201900445154','UI201900434584');
+"REM WORKSPACETAB7",Query21,,2
+SELECT ROWID, A. * FROM gnmm_quot_backup A where V_POLICY_NO IN
+ ('UI201800359386');
+"REM WORKSPACETAB8",Query20,,3
+SELECT  * FROM gnmm_quot_backup  where V_POLICY_NO IN
+ ('UI201800359386') order by 1;
+ /
+"REM WORKSPACETAB9",Query11,,1
+select  rowid, a. * from GNMT_POLICY_EVENT_LINK  a  where V_POLICY_NO in ('UI201800359386');
+"REM WORKSPACETAB10",Query12,,2
+SELECT ROWID, A. * FROM gnmm_quot_backup A where V_POLICY_NO IN
+ ('UI201900460462','UI201900445154') AND v_plri_code ='BWED02';
+"REM WORKSPACETAB11",Query23,,4
+SELECT ROWID, A. * FROM gnmm_quot_backup A where V_POLICY_NO IN
+ I201900460462','UI201900445154') AND v_plri_code ='BWED02'
+
+SELECT * FROM gnmm_quot_backup
+"REM WORKSPACETAB12",Query24,,10
+SELECT v_quotation_id,v_quot_backup_type,v_cntr_stat_Code,v_policy_no FROM gnmt_quotation where v_quotation_id = '206911';
+ 202944 --WORKEN ON IN THE PAST
+
+ 206911 -- NOT WORKING;
+
+
+ select * from GNMM_POLICY_STATUS_MASTER where v_status_code = 'NB203';
+
+ UPDATE gnmt_quotation SET v_quot_backup_type = NULL
+ where  v_quotation_id = '206911';
+"REM WORKSPACETAB13",Query25,,2
+UPDATE gnmt_quotation SET v_quot_backup_type = NULL
+ where  v_quotation_id = '206911';
+"REM WORKSPACETAB14",Query13,,1
+ SELECT ROWID, A. * FROM gnmt_quot_backup_dtl A where N_BACKUP_REF_NO IN (1050458,1104422,4173453,4173456);
+"REM WORKSPACETAB15",Query9,,1
+SELECT v_plan_code , v_policy_no FROM gnmt_policy wHERE v_policy_no IN ('UI201900444152','UI201900434584','UI201900446882');
+"REM WORKSPACETAB16",Query7,,6
+select * from GNMT_POLICY_EVENT_LINK;  
+
+
+--UI201800341724
+
+--UI201900460462 
+"REM WORKSPACETAB17",Query10,,10
+--UI201800341724
+
+--exec bpc_generate_maturity_test (user,user,sysdate,sysdate);
+
+
+exec bpg_maturity.bpc_generate_maturity (user,user,sysdate,sysdate);
+select * from CLDT_CLAIM_EVENT_POLICY_LINK where V_POLICY_NO ='UI201800359386';
+--UI201800341724
+
+--UI201900460462
+"REM WORKSPACETAB18",Query22,,8
+select * from PSMT_LAPSE_EXCEPTION where V_POLICY_NO ='UI202000546064';
+
+
+select * from GNMM_BATCH_LIST order by 1  ;
+exec bpg_ps_common.bpc_move_policy_to_grace (USER,USER,SYSDATE,'UI202000546064');
+exec bpg_policy_servicing.BPC_INITIATE_LAPSE (USER,USER,SYSDATE,'UI202000546064');
+
+select V_POLICY_NO, V_CNTR_STAT_CODE from GNMT_POLICY where V_POLICY_NO ='UI202000546064';
+"REM WORKSPACETAB19",Query14,,130
+SELECT 	gqb.N_BACKUP_REF_NO V_QUOTATION_ID,
+       	gqb.V_POLICY_NO V_POLICY_NO,
+       	gqb.N_SEQ_NO,
+		gqb.N_CUST_REF_NO,
+		gqb.V_CURRENCY_CODE,
+		gqb.V_SC_PATTERN_CODE,
+		gqb.D_DOB,
+		gqb.d_issue_date,
+		gqb.N_AGE_at_entry,
+		gqb.V_PLRI_CODE,
+		gqb.V_PARENT_PLRI_CODE,
+		gqb.D_CNTR_START_DATE,
+		gqb.D_CNTR_END_DATE,
+		gqb.V_CNTR_STAT_CODE,
+		gqb.D_RIDER_START,
+		gqb.D_RIDER_END,
+		gqb.V_RIDER_STAT_CODE,
+		gqb.D_PLRI_START_DATE,
+		gqb.D_PLRI_END_DATE,
+		gqb.N_SA_AMOUNT,
+		gqb.V_PLRI_FLAG,
+		nvl(gqb.V_PNPAR_FLAG,'N'),
+		gqb.V_BASESUB_FLAG,
+		gqb.V_WOP_STATUS,
+		gqb.v_jointlife,
+		gqbd.V_EVENT_CODE,
+		gqbd.V_PARENT_EVENT_CODE,
+		gqbd.N_AMT_PAYABLE,
+		gqbd.N_MAX_DAYS,
+		gqbd.V_PYMT_FREQ,
+		gqbd.V_FRE_FLAG,
+		gqbd.v_pay_criteria,
+		gqbd.n_plri_sa,
+		gpel.n_max_age,
+		gpel.V_SUBEVENTS_FLAG,
+		gpel.V_INSTS_FLAG,
+		gpel.V_BENEFICIARY_FLAG,
+		gpel.V_ETI_FLAG,
+		gpel.V_RPU_FLAG,
+		gpel.V_CLAIM_TYPE,
+		cte.d_event_date,
+		cte.v_root_cause,
+		cte.V_EXCLUSION_CODE,
+		cte.d_intimation_date
+FROM 	GNMM_QUOT_BACKUP gqb,
+		GNMT_QUOT_BACKUP_DTL gqbd,
+		GNMM_PLAN_EVENT_LINK gpel,
+		CLDT_TEMP_EVENT cte
+WHERE 	gqbd.n_backup_ref_no 		= gqb.n_backup_ref_no
+AND 	gpel.v_plan_code 			= gqb.v_plri_code
+AND 	gpel.v_event_code 			= gqbd.v_event_code
+AND 	gpel.v_parent_event_code 	= gqbd.v_parent_event_code
+AND 	gpel.v_register_claim='Y'
+AND 	gqbd.v_event_code 			= cte.v_event_code
+AND 	trunc(cte.d_event_date) BETWEEN trunc(gqb.d_plri_start_date) AND trunc(gqb.d_plri_end_date )
+AND 	n_max_slno = (SELECT MAX(n_max_slno)
+			   	  		FROM GNMM_QUOT_BACKUP gqbs
+				  		where 	trunc(cte.d_event_date)  BETWEEN trunc(gqbs.d_plri_start_date) AND trunc(gqbs.d_plri_end_date)
+				  		AND 	gqbs.v_policy_no 	= gqb.v_policy_no
+				  		and 	gqbs.n_seq_no 		= gqb.n_seq_no
+				  		and 	gqbs.v_plri_code	=	gqb.v_plri_code
+				  		and 	gqbs.n_cust_ref_no 	= gqb.n_cust_ref_no )
+                        AND GQB.V_POLICY_NO= 'GL202503385232'
+
+SELECT 	gqb.N_BACKUP_REF_NO V_QUOTATION_ID,
+       	gqb.V_POLICY_NO V_POLICY_NO,
+       	gqb.N_SEQ_NO,
+		gqb.N_CUST_REF_NO,
+		gqb.V_CURRENCY_CODE,
+		gqb.V_SC_PATTERN_CODE,
+		gqb.D_DOB,
+		gqb.d_issue_date,
+		gqb.N_AGE_at_entry,
+		gqb.V_PLRI_CODE,
+		gqb.V_PARENT_PLRI_CODE,
+		gqb.D_CNTR_START_DATE,
+		gqb.D_CNTR_END_DATE,
+		gqb.V_CNTR_STAT_CODE,
+		gqb.D_RIDER_START,
+		gqb.D_RIDER_END,
+		gqb.V_RIDER_STAT_CODE,
+		gqb.D_PLRI_START_DATE,
+		gqb.D_PLRI_END_DATE,
+		gqb.N_SA_AMOUNT,
+		gqb.V_PLRI_FLAG,
+		nvl(gqb.V_PNPAR_FLAG,'N'),
+		gqb.V_BASESUB_FLAG,
+		gqb.V_WOP_STATUS,
+		gqb.v_jointlife,
+		gqbd.V_EVENT_CODE,
+		gqbd.V_PARENT_EVENT_CODE,
+		gqbd.N_AMT_PAYABLE,
+		gqbd.N_MAX_DAYS,
+		gqbd.V_PYMT_FREQ,
+		gqbd.V_FRE_FLAG,
+		gqbd.v_pay_criteria,
+		gqbd.n_plri_sa,
+		gpel.n_max_age,
+		gpel.V_SUBEVENTS_FLAG,
+		gpel.V_INSTS_FLAG,
+		gpel.V_BENEFICIARY_FLAG,
+		gpel.V_ETI_FLAG,
+		gpel.V_RPU_FLAG,
+		gpel.V_CLAIM_TYPE,
+		cte.d_event_date,
+		cte.v_root_cause,
+		cte.V_EXCLUSION_CODE,
+		cte.d_intimation_date
+FROM 	GNMM_QUOT_BACKUP gqb,
+		GNMT_QUOT_BACKUP_DTL gqbd,
+		GNMM_PLAN_EVENT_LINK gpel,
+		CLDT_TEMP_EVENT cte
+WHERE 	gqbd.n_backup_ref_no 		= gqb.n_backup_ref_no
+--AND 	gpel.v_plan_code 			= gqb.v_plri_code
+--AND 	gpel.v_event_code 			= gqbd.v_event_code
+--AND 	gpel.v_parent_event_code 	= gqbd.v_parent_event_code
+AND 	gpel.v_register_claim='Y'
+AND     GQB.V_POLICY_NO= 'UI201900481042'
+--AND 	gqbd.v_event_code 			= cte.v_event_code
+--AND 	trunc(cte.d_event_date) BETWEEN trunc(gqb.d_plri_start_date) AND trunc(gqb.d_plri_end_date )
+/*AND 	n_max_slno = (SELECT MAX(n_max_slno)
+			   	  		FROM GNMM_QUOT_BACKUP gqbs
+				  		where 	trunc(cte.d_event_date)  BETWEEN trunc(gqbs.d_plri_start_date) AND trunc(gqbs.d_plri_end_date)
+				  		AND 	gqbs.v_policy_no 	= gqb.v_policy_no
+				  		and 	gqbs.n_seq_no 		= gqb.n_seq_no
+				  		and 	gqbs.v_plri_code	=	gqb.v_plri_code
+				  		and 	gqbs.n_cust_ref_no 	= gqb.n_cust_ref_no )*/
+                        ;
+                        /
+
+"REM WORKSPACETAB20",Query16,,0
+"REM WORKSPACETAB21",Query17,,52
+SELECT *FROM GNMT_POLICY WHERE V_POLICY_NO='UI202100657625';
+
+SELECT V_POLICY_NO,D_COMMENCEMENT,D_ISSUE,D_PREM_DUE_DATE,D_NEXT_OUT_DATE,V_CNTR_STAT_CODE,V_CNTR_PREM_STAT_CODE
+FROM GNMT_POLICY WHERE V_POLICY_NO='UI202100657625';
+
+SELECT V_POLICY_NO,D_PREM_DUE_DATE,D_NEXT_due_DATE,V_CNTR_STAT_CODE,V_CNTR_PREM_STAT_CODE
+FROM GNMT_POLICY_detail WHERE V_POLICY_NO='UI202100657625';
+
+SELECT *FROM PPMT_OUTSTANDING_PREMIUM WHERE V_POLICY_NO='UI202100657625'  ORDER BY 3 DESC;
+
+select *from remt_receipt where v_receipt_table='DETAIL' and v_policy_no='UI202100657625' and v_receipt_status='RE001';
+
+select sum(n_receipt_amt) from remt_receipt
+where v_receipt_table='DETAIL' and v_policy_no='UI202100657625' and v_receipt_status='RE001';--12000000
+
+select sum(n_amount) FROM PPMT_OUTSTANDING_PREMIUM WHERE V_POLICY_NO='UI202100657625' and v_status='I';--9000000
+
+select 12000000-9000000 from dual; ---3000000
+
+select -3000000/1000000 from dual; --3 dues
+
+select 199977 * 8 from dual; --1599816
+
+select 1599816-1620483 from dual; ---20667
+
+select *from pydt_voucher_policy_client where V_POLICY_NO='UI202100657625';
+
+select *from ppmt_overshort_payment  WHERE V_POLICY_NO='UI202100657625';--313194
+
+select *from ppdt_overshort_payment_det  WHERE V_POLICY_NO='UI202100657625' order by 5 desc;  --HQ240237411
+
+select 380437- 1620483 from dual; ---1240046
+
+exec bpc_lapse_reversal('UI202100657625');
+
+exec gen_outstanding_prem_test(user,'JHLU_11038-159',sysdate,'UI202100657625');
+
+exec bpg_grplife_billing.PUT_OVERPAYMENT_IN_HOLDING(user,'JHLU_11038-159',sysdate,'UI202100657625');
+exec bpg_grplife_billing.KNOCK_DN_FROM_RECEIPT_HOLDING(user,'JHLU_11038-159',sysdate,'UI202100657625');
+
+select m.v_polag_no,d.v_giss_code,sum(decode(v_type,'D',n_amt,-n_amt)) amt
+from gnmt_gl_master m,gndt_gl_details d
+where m.n_ref_no=d.n_ref_no
+and m.v_polag_no=d.v_polag_no
+and m.v_polag_no='UI202100657625'
+group by m.v_polag_no,d.v_giss_code;
+
+select 2599563 +20667 from dual;--2620230
+
+select 2599563+1620483 from dual;
+
+
+"REM WORKSPACETAB22",Query19,,0
+"REM WORKSPACETAB23",Query18,,143
+Declare
+
+LN_Journal_No      NUMBER;
+LN_Sub_No        NUMBER(3);
+lv_agent_branch      AMMM_Agent_Master.v_Branch_Code%TYPE;
+LV_Lob_Code        GNLU_LOB_Master.V_Lob_Code%TYPE;
+lv_par_nonpar      VARCHAR2(1);
+lv_biz_unit        VARCHAR2(1);
+LV_Giss_Code      GNMT_Coda_Mapping.V_Giss_Code%TYPE;
+LV_Desc          VARCHAR2(100);
+CT_ADJUSTED_FROM        VARCHAR2(50);
+
+lv_channel_acc_code    VARCHAR2(100);
+LV_Journal_Status    VARCHAR2(1);
+LN_Debit_Sum      NUMBER;
+LN_Credit_Sum      NUMBER;
+ln_pol_year        NUMBER(5);
+lv_plri_code       varchar2(100);
+lv_account_code      varchar2(100);
+lv_company_code         VARCHAR2(50);
+lv_company_branch       VARCHAR2(200);
+
+Begin
+ bpc_lapse_reversal('UI201900489350');
+
+ gen_outstanding_prem_test(user,'JHLU_11038-153',sysdate,'UI201900489350');
+
+Bpg_Baj_Accounting.Insert_GL_Master(
+                    p_jrn_no         => LN_Journal_No,
+                    p_jrn_date         => sysdate,
+                    p_doc_type         => 'RECEIPT',
+                    p_doc_ref_no       => 'HQ240237411',
+                    p_polag_type       => 'P',
+                    p_polag_no         => 'UI201900489350',
+                    p_seq_no         => 1,
+                    p_user           => user,
+                    p_prog           => 'JHLU_11038-153',
+                    p_date           => sysdate,
+                    p_process_code       => 'ACT001',
+                    p_Involve_Inter_Fund   => NULL,
+                    p_Inter_Fund_Role    => NULL,
+                    p_Parent_Ref_No      => NULL
+                    );
+
+      Bpg_Gen.BPC_GET_PLAN_FOR_THE_POLICY(  P_POLICY_NO => 'UI201900489350',
+                            P_PLAN_CODE => lv_plri_code);
+      lv_account_code    := NULL;
+      lv_biz_unit      := Bpg_Baj_Accounting.Bfn_Buz_Unit_For_Policy(p_policy_no => 'UI201900489350');
+      lv_channel_acc_code := Bpg_Baj_Accounting.Bfn_Channel_Ac_Code_For_Policy(p_policy_no => 'UI201900489350');
+      lv_lob_code     := Bpg_Gen.Bfn_Get_LOB_Code_From_Policy(p_Policy_No => 'UI201900489350')  ;
+      lv_par_nonpar     := Bpg_Grplife_Billing.bfn_get_par_nonpar(
+                        p_policy_no    => 'UI201900489350',
+                        p_seq_no    => 1,
+                        p_plan_code    => lv_plri_code,
+                        p_parent_plan  => lv_plri_code,
+                        p_date      =>  sysdate
+                        );
+      lv_agent_branch := Bpg_Baj_Accounting.Bfn_Agent_Branch_For_Policy(p_policy_no => 'UI201900489350' );
+
+      ln_pol_year := Bpg_Gen.bfn_get_policy_year(
+            p_policy_no =>  'UI201900489350',
+              p_seq_no   =>  1,
+            p_plan_code =>  lv_plri_code,
+            p_plri_flag =>  'P',
+            p_due_date   =>  sysdate,
+            p_parent_plri =>lv_plri_code);
+
+      LN_Sub_No:=1;
+      Bpg_Baj_Accounting.INSERT_GL_DETAILS(
+                  p_jrn_no       => LN_Journal_No,
+                                p_sub_no       => LN_Sub_No,
+                                p_giss_code     => 'GRA004',
+                  p_type         => 'D',
+                  p_amt         => 4220046,
+                  p_currency       => Bpg_Currency.get_policy_currency('UI201900489350'),
+                  p_user         => user,
+                  p_prog         => 'JHLU_11038-153',
+                  p_date         => SYSDATE,
+                  p_plri_code     => lv_plri_code,
+                  p_prod_acct_flag   => 'Y',
+                  p_passed_mapping_flag   => 'M',
+                  p_year         => ln_pol_year,
+                  p_account_code     =>  NULL,
+                  p_agent_branch     =>  lv_agent_branch,
+                  p_lob_code       =>   lv_lob_code,
+                  p_par_non_par     =>   lv_par_nonpar,
+                  p_fund_code     =>   NULL,
+                       p_business_unit   => lv_biz_unit,
+                       p_det_polag_type   => NULL,
+                       p_det_policy_no   => NULL,
+                       p_gl_desc      => Bpg_Baj_Accounting.Bfn_GL_Desc_for_Giss_Code(p_giss_code => 'GRA004'),
+                       p_channel_acct_code => lv_channel_acc_code);
+
+      LN_Sub_No   := LN_Sub_No + 1;
+      Bpg_Baj_Accounting.INSERT_GL_DETAILS(
+                  p_jrn_no       => LN_Journal_No,
+                  p_sub_no       => LN_Sub_No,
+                  p_giss_code     => 'GRA010',
+                  p_type         => 'C',
+                  p_amt         => 4220046,
+                  p_currency       => Bpg_Currency.get_policy_currency('UI201900489350'),
+                  p_user         => user,
+                  p_prog         => 'JHLU_11038-153',
+                  p_date         => SYSDATE,
+                  p_plri_code     => lv_plri_code,
+                  p_prod_acct_flag   => 'Y',
+                  p_passed_mapping_flag => 'M',
+                  p_year         => ln_pol_year,
+                  p_account_code     => NULL,
+                  p_agent_branch     => lv_agent_branch,
+                  p_lob_code       => lv_lob_code,
+                  p_par_non_par     => lv_par_nonpar,
+                  p_fund_code     => NULL,
+                  p_business_unit   => lv_biz_unit,
+                  p_det_polag_type   => NULL,
+                  p_det_policy_no   => NULL,
+                  p_gl_desc      => Bpg_Baj_Accounting.Bfn_GL_Desc_for_Giss_Code(p_giss_code => 'GRA010'),
+                  p_channel_acct_code => lv_channel_acc_code);
+
+      Bpg_Baj_Accounting.Bpc_Journal_Audit(
+                    p_journal_no     => LN_Journal_No,
+                    p_journal_status   => LV_Journal_Status,--out
+                    p_debit_sum     => LN_Debit_Sum,--out
+                    p_credit_sum     => LN_Credit_Sum,--out
+                    p_user         => user,
+                    p_prog         => 'JHLU_11038-153',
+                    p_date         => sysdate
+                    );
+  Bpg_Grplife_Billing.GRP_APPROPRIATE_OVER_SHORT(
+                    p_policy_no   => 'UI201900489350',
+                    p_seq_no      => 1,
+                    p_amount      => 1240046,
+                    p_type        => 'O',
+                    p_ref_no      => 'HQ240237411',
+                    p_posted_from => 'RECEIPT',
+                    p_posted_date => SYSDATE,
+                    p_user        => user,
+                    p_prog        => 'JHLU_11038-153'
+                    );
+
+--bpg_grplife_billing.PUT_OVERPAYMENT_IN_HOLDING(user,'JHLU_11038-153',sysdate,'UI201900489350');
+--bpg_grplife_billing.KNOCK_DN_FROM_RECEIPT_HOLDING(user,'JHLU_11038-153',sysdate,'UI201900489350');
+ End;
+"REM WORKSPACETAB24",Query15,,2
+INSERT INTO CLDT_TEMP_EVENT(V_EVENT_CODE,D_EVENT_DATE)VALUES
+('GMAT',TO_DATE('04-OCT-2024','DD-MON-YYYY'));

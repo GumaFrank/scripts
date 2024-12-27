@@ -1,0 +1,137 @@
+"REM WORKSPACETAB0",Query1,,3
+UG202300901250
+UG202401156801
+UG202401103376
+"REM WORKSPACETAB1",Query5,,1
+SELECT * FROM AMMT_AGENT_BENEFIT_POOL WHERE n_agent_no ='4022';
+"REM WORKSPACETAB2",Query2,,1
+select * from AMMT_POL_COMM_DETAIL where V_POLICY_NO ='UG202300901250';--commission for this agnet is not moved to benefit pool
+"REM WORKSPACETAB3",Query3,,1
+select * from GNMM_BATCH_LIST order by 1;
+"REM WORKSPACETAB4",Query4,,4
+select  tname from tab where tname like '%BENEFIT%';
+
+
+--select * from GNMT_BATCH_EXE_TRACE where n_batch_no ='47.2' order by 1 desc ;
+"REM WORKSPACETAB5",Query6,,1
+select  * from GNMT_POLICY_EVENT_LINK   where V_POLICY_NO ='UI201900445154';
+"REM WORKSPACETAB6",WEDDING,,12
+
+
+select  rowid, a. * from GNMT_POLICY_EVENT_LINK  a  where V_POLICY_NO in ('UI201900460462','UI201900445154');   ---UI201900460462
+
+SELECT ROWID, A. * FROM gnmm_quot_backup A where V_POLICY_NO IN
+ ('UI201900445154','UI201900434584');
+ /
+
+ SELECT ROWID, A. * FROM gnmt_quot_backup_dtl A where N_BACKUP_REF_NO IN (1050458,1104775); -- A.V_POLICY_NO IN
+-- ('UI201900445154','UI201900434584');
+
+SELECT ROWID, A. * FROM gnmm_quot_backup A where V_POLICY_NO IN ('UI201900445154','UI201900434584');
+"REM WORKSPACETAB7",Query11,,1
+select  rowid, a. * from GNMT_POLICY_EVENT_LINK  a  where V_POLICY_NO in ('UI201900460462','UI201900445154');
+"REM WORKSPACETAB8",Query12,,2
+SELECT ROWID, A. * FROM gnmm_quot_backup A where V_POLICY_NO IN
+ ('UI201900460462','UI201900445154') AND v_plri_code ='BWED02';
+"REM WORKSPACETAB9",Query13,,1
+ SELECT ROWID, A. * FROM gnmt_quot_backup_dtl A where N_BACKUP_REF_NO IN (1050458,1104422,4173453,4173456);
+"REM WORKSPACETAB10",Query9,,1
+SELECT v_plan_code , v_policy_no FROM gnmt_policy wHERE v_policy_no IN ('UI201900444152','UI201900434584','UI201900446882');
+"REM WORKSPACETAB11",Query7,,7
+select * from GNMT_POLICY_EVENT_LINK;  
+
+
+--UI201800341724
+
+--UI201900460462 
+UI201800341724
+"REM WORKSPACETAB12",Query14,,4
+Policy, UI201900481042 has wrong arrears, it has 5100000 instead of 2800000
+
+-- even this policy has a similar issue UI201900489350
+  -- CUSTOMER IS SUPPOSED TO PAY 3980000 BUT the system shows an out standing of 5599241
+"REM WORKSPACETAB13",Query15,,19
+select SUM ( N_RECEIPT_AMT )  from remt_receipt where V_POLICY_NO ='UI201900481042' and V_RECEIPT_TABLE ='DETAIL' and V_RECEIPT_STATUS ='RE001';   ---3781029
+
+select SUM (N_AMOUNT) from PPMT_OUTSTANDING_PREMIUM where V_POLICY_NO ='UI201900481042' and V_STATUS <>'R';   ---900000
+select d_prem_due_date,SUM (n_amt_called) from gndt_bill_ind_dets
+ where V_POLICY_NO ='UI201900481042' and V_rec_STATUS <>'R' group by d_Prem_due_date order by 1;
+
+  select *  from psmt_policy_revival where V_POLICY_NO ='UI201900481042';
+    select *  from ppdt_overshort_payment_det where V_POLICY_NO ='UI201900481042' order by d_lastupd_inftim;
+select  900000-3781029  from dual;  --2881029
+
+select 3081029 - 900000 from dual;   --2181029  from dual;
+
+  select *  from ppmt_overshort_payment where V_POLICY_NO ='UI201900481042';
+  SELECT 1318971+   2881029 FROM DUAL;
+  select  2881029- 81029 from dual;
+  select 581029- 2881029 from dual;
+
+
+
+"REM WORKSPACETAB14",Query18,,18
+select n_term,n_prem_pay_term,d_prem_paying_end_date,v_plan_code,n_net_contribution,d_prem_due_date,d_policy_end_date,d_next_out_date,d_commencement,v_cntr_stat_code,v_cntr_prem_stat_code,a.* from gnmt_policy a
+
+where v_policy_no='UI201900481042';
+
+select * from ppmt_overshort_payment  where v_policy_no='UI201900481042'  ;
+
+select * from ppdt_overshort_payment_det  where v_policy_no='UI201900481042'  ;
+
+select v_bill_no,d_prem_due_date,v_rec_status,sum(n_amt_called) from gndt_bill_ind_dets  where v_policy_no='UI201900481042' and v_rec_status<>'R'
+
+group by v_bill_no,d_prem_due_date,v_rec_status order by d_prem_due_date;
+
+select  sum(n_amt_called) from gndt_bill_ind_dets  where v_policy_no='UI201900481042' and v_rec_status<>'R';
+
+select  sum(n_receipt_amt)t o from remt_receipt  where v_policy_no='UI201900481042' and v_receipt_table='DETAIL'  and v_receipt_status='RE001';
+
+select 796451,157476*5,160723-9071 from dual;
+
+"REM WORKSPACETAB15",Query17,,27
+declare
+lv_policy_no gnmt_policy.v_policy_no%type:='UI201900481042';
+begin
+bpc_lapse_reversal(lv_policy_no);
+
+bpg_grplife_billing.grp_appropriate_over_short(lv_policy_no,1,4200000,'O','3929614','REVIVAL',sysdate,user,'JIRA_403');
+bpg_grplife_billing.bpc_raise_first_bill(	lv_policy_no,
+                   									'PB',
+                    								USER,
+                    								'JIRA_403_1',
+                    								trunc(sysdate),
+                    								NULL,
+                    								'N',
+                    								'G');
+
+bpg_grplife_billing.put_overpayment_in_holding(USER,
+												'JIRA_403_2',
+												trunc(sysdate),
+												lv_policy_no);
+
+bpg_grplife_billing.knock_dn_from_receipt_holding(USER,
+												'JIRA_403_3',
+												trunc(sysdate),
+												lv_policy_no);
+
+
+END;
+"REM WORKSPACETAB16",Query16,,6
+select SUM (N_RECEIPT_AMT)  from remt_receipt where V_POLICY_NO ='UI201900481042' and V_RECEIPT_TABLE ='DETAIL' and V_RECEIPT_STATUS ='RE001';   ---3781029
+
+
+select SUM (N_RECEIPT_AMT) from remt_receipt where V_POLICY_NO ='UI201900481042' and V_RECEIPT_TABLE ='DETAIL' and V_RECEIPT_STATUS <> 'RE001'; ---700000
+
+select 3781029 -  700000 from dual; ---3081029
+"REM WORKSPACETAB17",Query10,,10
+--UI201800341724
+
+--exec bpc_generate_maturity_test (user,user,sysdate,sysdate);
+
+
+exec bpg_maturity.bpc_generate_maturity (user,user,sysdate,sysdate);
+select * from CLDT_CLAIM_EVENT_POLICY_LINK where V_POLICY_NO ='UI201900460462';
+--UI201800341724
+
+--UI201900460462

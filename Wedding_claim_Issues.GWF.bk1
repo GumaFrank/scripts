@@ -1,0 +1,57 @@
+"REM WORKSPACETAB0",Query1,,3
+UG202300901250
+UG202401156801
+UG202401103376
+"REM WORKSPACETAB1",Query5,,1
+SELECT * FROM AMMT_AGENT_BENEFIT_POOL WHERE n_agent_no ='4022';
+"REM WORKSPACETAB2",Query2,,1
+select * from AMMT_POL_COMM_DETAIL where V_POLICY_NO ='UG202300901250';--commission for this agnet is not moved to benefit pool
+"REM WORKSPACETAB3",Query3,,1
+select * from GNMM_BATCH_LIST order by 1;
+"REM WORKSPACETAB4",Query4,,4
+select  tname from tab where tname like '%BENEFIT%';
+
+
+--select * from GNMT_BATCH_EXE_TRACE where n_batch_no ='47.2' order by 1 desc ;
+"REM WORKSPACETAB5",Query6,,1
+select  * from GNMT_POLICY_EVENT_LINK   where V_POLICY_NO ='UI201900445154';
+"REM WORKSPACETAB6",WEDDING,,12
+
+
+select  rowid, a. * from GNMT_POLICY_EVENT_LINK  a  where V_POLICY_NO in ('UI201900460462','UI201900445154');   ---UI201900460462
+
+SELECT ROWID, A. * FROM gnmm_quot_backup A where V_POLICY_NO IN
+ ('UI201900445154','UI201900434584');
+ /
+
+ SELECT ROWID, A. * FROM gnmt_quot_backup_dtl A where N_BACKUP_REF_NO IN (1050458,1104775); -- A.V_POLICY_NO IN
+-- ('UI201900445154','UI201900434584');
+
+SELECT ROWID, A. * FROM gnmm_quot_backup A where V_POLICY_NO IN ('UI201900445154','UI201900434584');
+"REM WORKSPACETAB7",Query11,,1
+select  rowid, a. * from GNMT_POLICY_EVENT_LINK  a  where V_POLICY_NO in ('UI201900460462','UI201900445154');
+"REM WORKSPACETAB8",Query12,,2
+SELECT ROWID, A. * FROM gnmm_quot_backup A where V_POLICY_NO IN
+ ('UI201900460462','UI201900445154') AND v_plri_code ='BWED02';
+"REM WORKSPACETAB9",Query13,,1
+ SELECT ROWID, A. * FROM gnmt_quot_backup_dtl A where N_BACKUP_REF_NO IN (1050458,1104422,4173453,4173456);
+"REM WORKSPACETAB10",Query9,,1
+SELECT v_plan_code , v_policy_no FROM gnmt_policy wHERE v_policy_no IN ('UI201900444152','UI201900434584','UI201900446882');
+"REM WORKSPACETAB11",Query7,,6
+select * from GNMT_POLICY_EVENT_LINK;  
+
+
+--UI201800341724
+
+--UI201900460462 
+"REM WORKSPACETAB12",Query10,,10
+--UI201800341724
+
+--exec bpc_generate_maturity_test (user,user,sysdate,sysdate);
+
+
+exec bpg_maturity.bpc_generate_maturity (user,user,sysdate,sysdate);
+select * from CLDT_CLAIM_EVENT_POLICY_LINK where V_POLICY_NO ='UI201900460462';
+--UI201800341724
+
+--UI201900460462

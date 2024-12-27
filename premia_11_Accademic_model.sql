@@ -1,0 +1,82 @@
+select * from pcom_customer
+
+select * from pgim_product  where prod_desc like '%Moto%'
+(select  prod_desc from pgim_product  where PROD_CODE=CLM_PROD_CODE) -- like '%Moto%'
+
+select * from pgit_policy 
+POL_ISSUE_DT
+POL_FM_DT
+POL_TO_DT
+POL_APPR_STS
+POL_FLEX_16
+
+SELECT * FROM PGIT_CLAIM WHERE ROWNUM <=20
+SELECT * FROM PGIT_CLAIM
+SELECT * FROM PGIT_CLM_EST where CE_CLM_SYS_ID =11920977
+
+SELECT * FROM PGIT_CLM_EST_AMT where PCEA_CLM_SYS_ID =11920977
+
+11920977
+
+select CLM_NO,TO_DATE(CLM_INTM_DT,'DD-MON-RRRR') INTM_DT
+ from PGIT_CLaim --where clm_no = 'C/210/1002/2019/000031'
+
+
+select pol_cust_code,pol_assr_code,pol_no from 
+pgit_policy where pol_no in 
+(select clm_pol_no from PGIT_CLaim where clm_no = 'C/210/5012/2021/000047')
+
+SELECT * FROM PGIT_CLAIM
+SELECT * FROM PGIT_CLM_EST
+
+POL_ISSUE_DT
+POL_FM_DT
+POL_TO_DT
+POL_APPR_STS
+POL_FLEX_16
+
+SELECT 
+(SELECT POL_NO FROM pgit_policy  WHERE POL_NO=CLM_POL_NO) policy_number,
+(SELECT POL_ASSR_NAME FROM pgit_policy  WHERE POL_NO=CLM_POL_NO) Assured_Name,
+(SELECT POL_ISSUE_DT FROM pgit_policy  WHERE POL_NO=CLM_POL_NO) Policy_issueDate,
+(SELECT POL_FM_DT FROM pgit_policy  WHERE POL_NO=CLM_POL_NO) Policy_start_date,
+(SELECT POL_TO_DT FROM pgit_policy  WHERE POL_NO=CLM_POL_NO) Policy_end_date,
+(SELECT POL_APPR_STS FROM pgit_policy  WHERE POL_NO=CLM_POL_NO) Approval_status,
+(SELECT POL_FLEX_16 FROM pgit_policy  WHERE POL_NO=CLM_POL_NO) Policy_classification,
+CLM_NO, CLM_POL_NO, 
+CLM_PROD_CODE, 
+(select  prod_desc from pgim_product  where PROD_CODE=CLM_PROD_CODE) PRODUCT,
+CLM_STS, 
+CLM_LOSS_DT, 
+CLM_EVENT_CODE,
+CLM_LOSS_CODE,
+CLM_CURR_CODE, 
+CLM_INTM_DT, 
+CLM_CR_DT, 
+CLM_CUST_CODE, 
+CLM_ASSR_CODE,
+CLM_ASSR_NAME,
+CLM_LOSS_REMARKS, 
+CLM_CLOSE_REMARKS,
+CLM_YEAR, CLM_CLMNT_NAME,
+CLM_DISCOVERY_DT
+CE_CR_DT, CE_DT, 
+CE_EST_CODE, 
+CE_CURR_CODE, 
+CE_AMT_FC, 
+CE_AMT_LC_1, 
+CE_AMT_LC_3, 
+CE_OUR_SHARE_AMT_FC, CE_OUR_SHARE_AMT_LC_1, CE_OUR_SHARE_AMT_LC_3, CE_PROD_CODE
+FROM  PGIT_CLAIM, PGIT_CLM_EST
+WHERE CLM_SYS_ID=CE_CLM_SYS_ID
+AND CLM_PROD_CODE IN 
+('1004',
+'1006',
+'1005',
+'1003',
+'1007',
+'1008',
+'1009',
+'1001',
+'1002')
+AND TRUNC(CLM_CR_DT) BETWEEN '01-JAN-2023' AND '12-DEC-2023'

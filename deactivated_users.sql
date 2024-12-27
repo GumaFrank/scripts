@@ -1,0 +1,5 @@
+select USERNAME, ACCOUNT_STATUS, 
+TRUNC(LOCK_DATE) Lock_Date, 
+TRUNC(CREATED) CREATION_DATE, 
+trunc(LAST_LOGIN) LAST_LOGIN
+  from dba_users  where LOCK_DATE is not null

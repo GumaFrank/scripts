@@ -1,0 +1,274 @@
+prepared by Guma Frank
+
+To handle payables within the same package, the JHL_OFA_PAYABLES_PROC procedure orchestrates the creation, transformation, and posting of payable transactions. Here is a detailed breakdown of how payables are handled:
+
+Procedure: JHL_OFA_PAYABLES_PROC
+Purpose: This procedure processes payable vouchers by creating, transforming, and posting payable transactions to the GL interface.
+
+Flow:
+
+Initialization:
+
+V_START_DATE is set to the current system date (SYSDATE).
+Fetching Vouchers:
+
+Cursor VOUCHERS selects voucher data that needs to be processed from PYMT_VOUCHER_ROOT and PYMT_VOU_MASTER.
+Calling Transformation Procedure:
+
+For each voucher, the procedure JHL_OFA_TRANSFORM_GL_VOU is called to transform the voucher data.
+Logging Job Details:
+
+After processing all vouchers, a record is inserted into the JHL_OFA_JOBS table to log the job details, including job ID, name, start date, and end date.
+Commit:
+
+The procedure commits the transaction to ensure all changes are saved.
+
+
+Procedure Code:
+
+PROCEDURE JHL_OFA_PAYABLES_PROC
+IS
+    CURSOR VOUCHERS
+    IS
+    SELECT V_VOU_DESC, V_VOU_NO, D_VOU_DATE
+    FROM PYMT_VOUCHER_ROOT PM, PYMT_VOU_MASTER PV
+    WHERE PM.V_MAIN_VOU_NO = PV.V_MAIN_VOU_NO
+      AND TO_DATE(D_VOU_DATE, 'DD/MM/RRRR') BETWEEN TO_DATE('01-JAN-20', 'DD/MM/RRRR') AND TO_DATE(SYSDATE, 'DD/MM/RRRR')
+      AND JHL_GEN_PKG.IS_VOUCHER_CANCELLED(V_VOU_NO) = 'N'
+      AND JHL_GEN_PKG.IS_VOUCHER_AUTHORIZED(V_VOU_NO) = 'Y'
+      AND V_VOU_NO NOT IN ('2021020177');
+      -- AND V_VOU_NO IN ('2023007522');
+
+    V_START_DATE DATE;
+BEGIN
+    V_START_DATE := SYSDATE;
+
+    FOR I IN VOUCHERS
+    LOOP
+        BEGIN
+            JHL_OFA_TRANSFORM_GL_VOU(I.V_VOU_NO);
+        END;
+
+        COMMIT;
+    END LOOP;
+
+    INSERT INTO JHL_OFA_JOBS (OJB_ID, OJB_NAME, OJB_START_DT, OJB_END_DT)
+    VALUES (JHL_OJB_ID_SEQ.NEXTVAL, 'JHL_OFA_PAYABLES_PROC', V_START_DATE, SYSDATE);
+
+    COMMIT;
+END;
+
+
+Related Procedures:
+JHL_OFA_TRANSFORM_GL_VOU:
+This procedure is responsible for transforming GL voucher data. It selects and processes transactions from the relevant tables and inserts them into JHL_OFA_PYMT_TRANSACTIONS.
+Procedure: JHL_OFA_TRANSFORM_GL_VOU
+Purpose: To transform GL voucher data and insert it into the JHL_OFA_PYMT_TRANSACTIONS table.
+
+Flow:
+
+Fetching Vouchers:
+
+Cursor VOUCHERS selects data from GNMT_GL_MASTER and GNDT_GL_DETAILS.
+Cursor VOUCHER selects voucher-related data.
+Transforming and Inserting Data:
+
+Transformed data is processed and inserted into JHL_OFA_PYMT_TRANSACTIONS.
+
+Procedure Code:
+
+PROCEDURE JHL_OFA_TRANSFORM_GL_VOU (V_VOUCHER_NO VARCHAR2)
+IS
+    CURSOR VOUCHERS
+    IS
+    SELECT V_GL_CODE ACCT_CODE, V_PROCESS_CODE, SUM(DECODE(V_TYPE, 'D', -N_AMT, N_AMT)) AMOUNT,
+           DECODE(V_DESC, 'INCOME_TAX', 'WHT TAX', V_DESC) V_DESC,
+           (SELECT DISTINCT OFA_ACC_CODE FROM JHL_ISF_OFA_ACC_MAP ACCS WHERE ACCS.ISF_GL_CODE = D.V_GL_CODE AND OFA_ACC_CODE IS NOT NULL AND ACCS.ACC_DESC = D.V_DESC) OFA_ACC_CODE,
+           DECODE(SIGN(SUM(DECODE(V_TYPE, 'D', -N_AMT, N_AMT))), -1, 1, 2) ORD,
+           V_DOCU_REF_NO V_VOU_NO, BPG_FINANCE_BATCHES.BFN_GET_PAYEE_NAME(V_DOCU_REF_NO) VENDOR_NAME,
+           ABS(SUM(DECODE(V_TYPE, 'D', -N_AMT, N_AMT))) AMT
+    FROM GNMT_GL_MASTER M, GNDT_GL_DETAILS D
+    WHERE M.N_REF_NO = D.N_REF_NO AND M.V_JOURNAL_STATUS = 'C' AND V_DOCU_TYPE = 'VOUCHER'
+      AND TO_DATE(M.D_POSTED_DATE, 'DD/MM/RRRR') BETWEEN TO_DATE('01-JAN-17', 'DD/MM/RRRR') AND TO_DATE('31-JAN-17', 'DD/MM/RRRR')
+      AND V_DOCU_REF_NO = V_VOUCHER_NO
+    GROUP BY V_GL_CODE, V_PROCESS_CODE, V_DESC, V_DOCU_REF_NO
+    ORDER BY ORD, AMT DESC;
+
+    CURSOR VOUCHER
+    IS
+    SELECT V_VOU_DESC, V_PAYEE_NAME, N_CUST_REF_NO, V_COMPANY_CODE, V_COMPANY_BRANCH, V_IND_COMPANY, PM.V_MAIN_VOU_NO V_MAIN_VOU_NO, N_VOU_AMOUNT, D_VOU_DATE, 'UGX' V_CURRENCY_CODE
+    FROM PYMT_VOUCHER_ROOT PM, PYMT_VOU_MASTER PV
+    WHERE PM.V_MAIN_VOU_NO = PV.V_MAIN_VOU_NO AND PV.V_VOU_NO = V_VOUCHER_NO;
+
+    PAYEE_NAME VARCHAR(400);
+    V_N_CUST_REF_NO NUMBER(25);
+    COMPANY_CODE VARCHAR2(20);
+    COMPANY_BRANCH VARCHAR2(50);
+    IND_COMPANY VARCHAR2(2);
+
+    V_PAY_AMOUNT NUMBER;
+    V_SIGN NUMBER;
+    V_GROSS_AMT NUMBER;
+    V_ACCOUNT VARCHAR2(50);
+    V_DESC VARCHAR2(200);
+    V_ACCT_CODE VARCHAR2(50);
+    V_COUNT NUMBER;
+    POLICY_NO VARCHAR2(30);
+    V_PIN_NO VARCHAR2(30);
+
+    V_AMOUNT NUMBER;
+    MAIN_VOU_NO VARCHAR2(50);
+    VOU_COUNT NUMBER;
+    V_SITE_CODE VARCHAR2(50);
+
+    V_TOTAL_AMOUNT NUMBER;
+
+    V_ERROR_MESSAGE VARCHAR2(1000);
+    V_EXIST_COUNT NUMBER := 0;
+    V_VOU_DATE DATE;
+    V_AGENT_NO NUMBER;
+    CURRENCY_CODE VARCHAR2(100);
+
+    V_POLICY_COUNT NUMBER;
+BEGIN
+    VOU_COUNT := 0;
+
+    SELECT COUNT(*) INTO VOU_COUNT FROM JHL_OFA_PYMT_TRANSACTIONS WHERE V_VOU_NO = V_VOUCHER_NO;
+
+    V_AGENT_NO := NULL;
+
+    IF VOU_COUNT = 0 THEN
+        V_COUNT := 0;
+
+        FOR I IN VOUCHERS LOOP
+            IF I.ACCT_CODE <> '115092' THEN
+                V_COUNT := V_COUNT + 1;
+
+                FOR V IN VOUCHER LOOP
+                    V_DESC := V.V_VOU_DESC;
+                    PAYEE_NAME := V.V_PAYEE_NAME;
+                    V_N_CUST_REF_NO := V.N_CUST_REF_NO;
+                    COMPANY_CODE := V.V_COMPANY_CODE;
+                    COMPANY_BRANCH := V.V_COMPANY_BRANCH;
+                    IND_COMPANY := V.V_IND_COMPANY;
+                    MAIN_VOU_NO := V.V_MAIN_VOU_NO;
+                    V_PAY_AMOUNT := V.N_VOU_AMOUNT;
+                    V_SIGN := SIGN(V.N_VOU_AMOUNT);
+                    V_VOU_DATE := V.D_VOU_DATE;
+                    CURRENCY_CODE := V.V_CURRENCY_CODE;
+                END LOOP;
+
+                IF IND_COMPANY = 'I' THEN
+                    BEGIN
+                        SELECT COUNT(*) INTO V_POLICY_COUNT FROM GNMT_POLICY P WHERE P.N_PAYER_REF_NO = V_N_CUST_REF_NO AND P.N_PAYER_REF_NO IS NOT NULL;
+                    EXCEPTION
+                        WHEN OTHERS THEN V_POLICY_COUNT := 0;
+                    END;
+                ELSE
+                    BEGIN
+                        SELECT COUNT(*) INTO V_POLICY_COUNT FROM GNMT_POLICY P WHERE P.V_COMPANY_CODE = COMPANY_CODE AND P.V_COMPANY_BRANCH = COMPANY_BRANCH AND P.V_COMPANY_CODE IS NOT NULL;
+                    EXCEPTION
+                        WHEN OTHERS THEN V_POLICY_COUNT := 0;
+                    END;
+                END IF;
+
+                POLICY_NO := NULL;
+
+                IF V_POLICY_COUNT > 0 AND UPPER(V_DESC) NOT IN ('REFUND COMPANY OVERSHOT', 'MEDICAL FEES PAYMENT', 'COMMISSION') THEN
+                    IF IND_COMPANY = 'I' THEN
+                        BEGIN
+                            SELECT V_POLICY_NO INTO POLICY_NO FROM PYDT_VOUCHER_POLICY_CLIENT WHERE V_VOU_NO = V_VOUCHER_NO AND V_POLICY_NO IN (SELECT V_POLICY_NO FROM GNMT_POLICY P WHERE P.N_PAYER_REF_NO = V_N_CUST_REF_NO AND P.N_PAYER_REF_NO IS NOT NULL);
+                        EXCEPTION
+                            WHEN OTHERS THEN POLICY_NO := NULL;
+                        END;
+                    ELSE
+                        BEGIN
+                            SELECT V_POLICY_NO INTO POLICY_NO FROM PYDT_VOUCHER_POLICY_CLIENT WHERE V_VOU_NO = V_VOUCHER_NO AND V_POLICY_NO IN (SELECT V_POLICY_NO FROM GNMT_POLICY P WHERE P.V_COMPANY_CODE = COMPANY_CODE AND P.V_COMPANY_BRANCH = COMPANY_BRANCH AND P.V_COMPANY_CODE IS NOT NULL);
+                        EXCEPTION
+                            WHEN OTHERS THEN POLICY_NO := NULL;
+                        END;
+                    END IF;
+                END IF;
+
+                IF IND_COMPANY = 'I' THEN
+                    V_SITE_CODE := NVL(POLICY_NO, 'PYR-' || V_N_CUST_REF_NO);
+
+                    CREATE_INDIVIDUAL_SUPPLIER(V_N_CUST_REF_NO);
+
+                    BEGIN
+                        SELECT OSP_PIN_NO INTO V_PIN_NO FROM JHL_OFA_SUPPLIER WHERE N_CUST_REF_NO = V_N_CUST_REF_NO;
+                    EXCEPTION
+                        WHEN OTHERS THEN RAISE_ERROR('ERROR GETTING PIN NUMBER CO CODE==' || V_N_CUST_REF_NO || ' NAME =' || PAYEE_NAME);
+                    END;
+
+                    IF V_SITE_CODE IS NULL THEN
+                        RAISE_ERROR('Site Code missing ' || V_N_CUST_REF_NO || ' ;;;;' || V_DESC || ' ;;;;' || POLICY_NO);
+                    END IF;
+                ELSE
+                    V_SITE_CODE := NVL(POLICY_NO, SUBSTR(TO_CHAR(COMPANY_CODE || '-' || COMPANY_BRANCH), 1, 15));
+
+                    CREATE_CORPORATE_SUPPLIER(COMPANY_CODE, COMPANY_BRANCH);
+
+                    BEGIN
+                        SELECT CSP_PIN_NO INTO V_PIN_NO FROM JHL_OFA_CO_SUPPLIER WHERE V_COMPANY_CODE = COMPANY_CODE AND V_COMPANY_BRANCH = COMPANY_BRANCH;
+                    EXCEPTION
+                        WHEN OTHERS THEN RAISE_ERROR('ERROR GETTING PIN NUMBER CO CODE==' || COMPANY_CODE || ' BRN =' || COMPANY_BRANCH);
+                    END;
+                END IF;
+
+                V_AMOUNT := I.AMOUNT * V_SIGN * -1;
+
+                INSERT INTO JHL_OFA_PYMT_TRANSACTIONS (OPT_NO, V_VOU_NO, LEGACY_SUPPLIER_CODE, VENDOR_NAME, VENDOR_SITE_CODE, INVOICE_AMOUNT, INVOICE_CURRENCY_CODE, EXCHANGE_RATE, DESCRIPTION, LIABILITY_ACCOUNT, LINE_NUMBER, LEGACY_REF1, LINE_AMOUNT, N_CUST_REF_NO, V_COMPANY_CODE, V_COMPANY_BRANCH, V_MAIN_VOU_NO, LEGACY_REF3, V_VOU_DATE)
+                VALUES (OFA_OPT_NO_SEQ.NEXTVAL, I.V_VOU_NO, NVL(TO_CHAR(V_N_CUST_REF_NO), TO_CHAR(COMPANY_CODE || '-' || COMPANY_BRANCH)), I.VENDOR_NAME, V_SITE_CODE, V_PAY_AMOUNT, CURRENCY_CODE, 1, I.V_DESC, I.OFA_ACC_CODE, V_COUNT, V_PIN_NO, V_AMOUNT, V_N_CUST_REF_NO, COMPANY_CODE, COMPANY_BRANCH, MAIN_VOU_NO, POLICY_NO, V_VOU_DATE);
+            END IF;
+        END LOOP;
+
+        SELECT SUM(LINE_AMOUNT) INTO V_TOTAL_AMOUNT FROM JHL_OFA_PYMT_TRANSACTIONS WHERE V_VOU_NO = V_VOUCHER_NO;
+
+        UPDATE JHL_OFA_PYMT_TRANSACTIONS SET INVOICE_AMOUNT = V_TOTAL_AMOUNT WHERE V_VOU_NO = V_VOUCHER_NO;
+
+        BEGIN
+            SELECT COUNT(*) INTO V_EXIST_COUNT FROM APPS.XXJIC_AP_CLAIM_MAP@JICOFPROD.COM WHERE LOB_NAME = 'JHL_UG_LIF_OU' AND PAYMENT_VOUCHER = V_VOUCHER_NO;
+        EXCEPTION
+            WHEN OTHERS THEN V_EXIST_COUNT := 0;
+        END;
+
+        IF V_EXIST_COUNT = 0 THEN
+            BEGIN
+                SELECT COUNT(*) INTO V_EXIST_COUNT FROM XXJICUG_AP_INVOICES_STG@JICOFPROD.COM WHERE OPERATING_UNIT = 'JHL_UG_LIF_OU' AND VOUCHER_NUM = V_VOUCHER_NO;
+            EXCEPTION
+                WHEN OTHERS THEN V_EXIST_COUNT := 0;
+            END;
+        END IF;
+
+        IF V_EXIST_COUNT = 0 AND V_TOTAL_AMOUNT <> 0 THEN
+            JHL_OFA_GL_VOUCHERS_NEW(V_VOUCHER_NO);
+        END IF;
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN RAISE_ERROR('v_voucher_no==' || V_VOUCHER_NO);
+END;
+
+
+Troubleshooting Payables
+If payables are not correctly posted, check the following:
+
+Data in Intermediate Tables:
+
+Verify that data exists in JHL_OFA_PYMT_TRANSACTIONS.
+
+
+SELECT * FROM JHL_OFA_PYMT_TRANSACTIONS WHERE V_VOU_NO = '<VOUCHER_NO>';
+
+
+Transformation Procedures:
+
+Ensure JHL_OFA_TRANSFORM_GL_VOU is correctly transforming data.
+Ensure JHL_OFA_GL_VOUCHERS_NEW is correctly inserting transformed data into the appropriate staging tables.
+Sending Procedure:
+
+Confirm SEND_GL_TRANS_TO_OFA is correctly sending data to APPS.GL_INTERFACE@JICOFPROD.COM.
+Database Links:
+
+Verify JICOFPROD.COM is correctly configured and accessible.
+

@@ -1,0 +1,302 @@
+
+
+
+--commit
+select *from amdt_agent_bene_pool_payment where trunc(d_trans_date) = trunc(sysdate);
+select *from am_error_log order by v_trans_date desc;
+select sysdate from dual;
+-- wait  the db is rreading Second of Apr? is it not suppossed to read firs?
+
+--or it is okay
+select n_agent_no,V_COMM_PAY,sum(n_comm_amt) from ammt_pol_comm_detail
+where v_comm_status = 'UP'
+and trunc(d_comm_gen) <= trunc(Sysdate)
+and trunc(d_comm_gen) >= to_date('01/04/2024','dd/mm/yyyy')
+and BPG_GEN.BFN_GET_LOB_CODE_FROM_POLICY(v_policy_no) <> 'LOB003'
+group by n_agent_no,V_COMM_PAY;
+
+select n_agent_no,d_comm_paid,V_COMM_PAY,sum(n_comm_amt) from ammt_pol_comm_detail
+where v_comm_status = 'P'
+and trunc(d_comm_gen) <= trunc(Sysdate)
+and trunc(d_comm_gen) >= to_date('01/04/2024','dd/mm/yyyy')
+and BPG_GEN.BFN_GET_LOB_CODE_FROM_POLICY(v_policy_no) <> 'LOB003'
+group by n_agent_no,d_comm_paid,V_COMM_PAY;
+
+select *from gnmm_req_repos_master where v_ssr_cr_no = 'RELEASE_JHL';
+select *from amdt_agent_bene_pool_payment where trunc(d_trans_date) = trunc(sysdate) and n_net_paid <> 0 order by 1 desc;
+/* this is the list of vouchers generated..you can verify so that we can commit
+-- which business is , all Agents? non grp  -- ok, as of today or 30th Apr? as of today
+-- good.. How about group life?group dont have payable commissions for this month
+---  Thank, Let me check the report....
+-- what should I always do when I face that Exception there is a specifc agent who created issue, which i updated now
+so, next month you will not get this error
+-- I may need to give a report to the management, What is the Agent Name, what was the issue  then I can update the management?
+A0000019	DONGE SIMON for this agent who is not eligible to sell grp life, bu tagged for grp life, so its hitting error while processing batch for non grp
+-- Great Explanation
+--- Let me Check the Report as of Today, and then I give you, and Fathima and Update
+thank You so much
+i havent commit yet, commit then you can see in report
+
+Which tab?
+
+   i just commited, you can proceed
+
+
+
+select *from ammm_channel_master order by 1;
+
+
+
+
+
+
+/* Procedure for Commission */
+
+
+declare
+PROCEDURE BPC_BATCH_COMM_PAYMENT_DAILY (P_USER VARCHAR2,P_PROG VARCHAR2, P_DATE DATE)
+IS
+  p_ben_seq 		NUMBER;
+  lv_holiday 		VARCHAR2(1)		:= 'N';
+  lv_a 				VARCHAR2(2)		:= 'A';
+  lv_financedept 	VARCHAR2(14)	:= 'FD';
+  lv_allbranch 		VARCHAR2(14)	:= 'ALL BRANCH';
+  lv_yyyy 			VARCHAR2(50)	:= 'YYYY';
+  ld_cutoff_date    DATE;
+  lv_batch_setup    VARCHAR2(1);
+  lv_lob_code       VARCHAR2(30); --Added for TKT_10883_289 on 20/10/2023.
+  excep 			EXCEPTION;
+--
+    lv_y                VARCHAR2(2) := 'Y';                          --added by pranith on jhl rfa 1563
+    lv_n                VARCHAR2(2) := 'N';                          --added by pranith on jhl rfa 1563
+    lv_d                VARCHAR2(2) := 'D';                          --added by pranith on jhl rfa 1563
+    lv_m                VARCHAR2(2) := 'M';                          --added by pranith on jhl rfa 1563
+    lv_pag045           VARCHAR2(50) := 'PAG045';                    --added by pranith on jhl rfa 1563
+    lv_weekly_holyday   VARCHAR2(50) := 'WEEKLY_HOLIDAY';            --added by pranith on jhl rfa 1563
+ --
+  CURSOR cr_gen_par_setup IS
+    SELECT v_th_cval
+      FROM gnlu_gen_par
+     WHERE v_parid  = 'PAGCOMMPYM'
+       AND v_status = 'A';
+
+  CURSOR cr_cutoff_date_get IS
+    SELECT trunc(d_cuttoff_date)
+      FROM ammm_ag_comm_batch_master
+ 	 WHERE trunc(d_run_date) = trunc(p_date)
+       AND v_status = 'A';
+
+BEGIN
+
+  IF bfn_ssr_cr_check_avail ('RELEASE_MZ', 'C') THEN
+
+
+    ld_cutoff_date := NULL;
+    lv_batch_setup := NULL;
+    OPEN cr_gen_par_setup;
+    FETCH cr_gen_par_setup INTO lv_batch_setup;
+    CLOSE cr_gen_par_setup;
+
+
+    IF NVL( lv_batch_setup, 'N' ) = 'Y' THEN
+      OPEN cr_cutoff_date_get;
+      FETCH cr_cutoff_date_get INTO ld_cutoff_date;
+      CLOSE cr_cutoff_date_get;
+      IF ld_cutoff_date IS NULL THEN
+        RETURN;
+      END IF;
+    END IF;
+
+    ld_cutoff_date := NVL( ld_cutoff_date, p_date );
+
+    IF NVL( lv_batch_setup, 'N' ) = 'N' THEN
+
+      FOR I IN ( SELECT DISTINCT v_holiday_code
+                   FROM  gnlu_holiday_maintenance
+			      WHERE (UPPER(v_branch_code) = lv_allbranch OR UPPER(V_BRANCH_CODE) = lv_financedept)
+			        AND v_status = lv_a
+				    AND n_year = TO_NUMBER(TO_CHAR(p_date,lv_yyyy))
+				    AND TRUNC(d_holiday_date) = TRUNC(p_date)
+               )
+      LOOP
+	    lv_holiday := 'Y';
+      END LOOP;
+
+      IF TRIM(TO_CHAR(p_date,'DAY')) IN ('SATURDAY','SUNDAY') THEN
+	    lv_holiday := 'Y';
+      END IF;
+
+    END IF;
+
+    IF NVL(lv_holiday,'N') = 'N' THEN
+
+	  bpg_agency_benefits.BPC_COMM_TO_BENEFIT_POOL (TRUNC(ld_cutoff_date),
+							    P_PROG,
+							    P_USER, NULL,
+							    'N',
+							    NULL,
+							    TRUNC(ld_cutoff_date));
+
+	  bpg_agency_benefits.BPC_BENEFIT_PAYMENT  (ld_cutoff_date, 'Y',
+						    P_PROG, P_USER ,
+	                        NULL,P_BEN_SEQ,NULL,
+						    TRUNC(ld_cutoff_date));
+
+	  bpg_agency_benefits.BPC_MERGE_VOUCHER_FOR_AGENTS ( ld_cutoff_date,P_USER,P_PROG);
+
+    END IF;
+
+    UPDATE ammm_ag_comm_batch_master
+       SET v_status = 'I'
+     WHERE trunc(d_run_date) = trunc(p_date)
+       AND v_status = 'A';
+
+    --COMMIT;
+
+    /*
+    EXCEPTION
+    WHEN excep THEN
+      INSERT INTO psmt_lapse_exception
+		            (v_policy_no, n_seq_no, d_prem_upto,
+		             d_lapsed, d_exception, v_exception_status, v_status,
+		             v_lastupd_user, v_lastupd_prog, v_lastupd_inftim,
+		             v_err_msg
+		            )
+	         VALUES ('DAILY COMM BATCH', 1, TO_DATE (SYSDATE, 'DD/MM/YYYY'),
+		             TO_DATE (SYSDATE, 'DD/MM/YYYY'), SYSDATE, 'P', 'A',
+		             USER, 'Daily Commission Batch', SYSDATE,
+		             'Sorry, Data Not Found In Daily Commission Batch Run Setup. Kindly Enter The Daily Commission Batch Run Date'
+		            ); */
+
+  ELSIF bfn_ssr_cr_check_avail ('RELEASE_JHL', 'C') OR bfn_ssr_cr_check_avail ('RELEASE_LOLC', 'C') THEN
+
+
+    FOR I IN ( SELECT DISTINCT V_HOLIDAY_CODE
+                 FROM  GNLU_HOLIDAY_MAINTENANCE
+				WHERE (UPPER(V_BRANCH_CODE) = LV_ALLBRANCH or UPPER(V_BRANCH_CODE) = LV_FINANCEDEPT)
+				  AND V_STATUS = LV_A
+				  AND N_YEAR = TO_NUMBER(TO_CHAR(P_DATE,LV_YYYY))
+				  AND TRUNC(D_HOLIDAY_DATE) = TRUNC(P_DATE)
+              )
+    LOOP
+	  LV_HOLIDAY := 'Y';
+    END LOOP;
+
+	IF TRIM(TO_CHAR(P_DATE,'DAY')) IN ('SATURDAY','SUNDAY') THEN
+
+	    LV_HOLIDAY := 'Y';
+	END IF;
+
+
+
+
+    --IF TRUNC(P_DATE) = TRUNC(LAST_DAY(P_DATE)) THEN
+		FOR cr_month IN (SELECT n_channel_no,v_bene_offset_appl,v_comm_batch_method FROM ammm_channel_master WHERE nvl(v_comm_batch_method,lv_d) = lv_m AND v_status = lv_a)
+        	LOOP
+        	    --Added for TKT_10883_289 on 20/10/2023.
+        	    lv_lob_code := NULL;
+        	    IF bfn_ssr_cr_check_avail ('TKT_10883_289', 'C') THEN
+        	    	lv_lob_code := 'LOB003';
+        	    ELSE
+        	        lv_lob_code := NULL;
+        	    END IF;
+        	    --End of addition.
+
+            	bpg_agency_benefits.bpc_comm_to_benefit_pool(
+										                    p_end_date       => trunc(p_date),
+										                    p_lastupd_prog   => p_prog,
+										                    p_lastupd_user   => p_user,
+										                    p_agent_no       => NULL,
+										                    p_dedns_flag     => 'N',
+										                    p_comm_channel   => cr_month.n_channel_no,
+										                    p_date           => trunc(p_date),
+										                    p_lob_code       => lv_lob_code --Added for TKT_10883_289 on 20/10/2023.
+										                );
+
+
+                bpg_agency_benefits.bpc_benefit_payment(
+									                    p_end_date       => p_date,
+									                    p_dedn_flag      => 'Y',
+									                    p_lastupd_prog   => p_prog,
+									                    p_lastupd_user   => p_user,
+									                    p_agent_no       => NULL,
+									                    p_seq            => p_ben_seq,
+									                    p_channel_no     => cr_month.n_channel_no,
+									                    p_date           => trunc(p_date),
+										      		    p_lob_code       => lv_lob_code --Added for TKT_10883_289 on 20/10/2023.
+									                );
+
+			bpg_agency_benefits.BPC_MERGE_VOUCHER_FOR_AGENTS ( P_DATE,P_USER,P_PROG);
+
+            END LOOP;
+	--END IF;
+
+
+	IF NVL(LV_HOLIDAY,'N') = 'N' THEN
+
+-- below  code added by pranith on jhl rfa 1563
+		FOR cr_daily IN ( SELECT n_channel_no,v_bene_offset_appl,v_comm_batch_method FROM ammm_channel_master WHERE nvl(v_comm_batch_method,lv_d) = lv_d AND v_status = lv_a) LOOP
+
+        	    --Added for TKT_10883_289 on 20/10/2023.
+        	    lv_lob_code := NULL;
+        	    IF bfn_ssr_cr_check_avail ('TKT_10883_289', 'C') THEN
+        	    	lv_lob_code := 'LOB003';
+        	    ELSE
+        	        lv_lob_code := NULL;
+        	    END IF;
+        	    --End of addition.
+
+                bpg_agency_benefits.bpc_comm_to_benefit_pool(
+										                    p_end_date       => trunc(p_date),
+										                    p_lastupd_prog   => p_prog,
+										                    p_lastupd_user   => p_user,
+										                    p_agent_no       => NULL,
+										                    p_dedns_flag     => 'N',
+										                    p_comm_channel   => cr_daily.n_channel_no,
+										                    p_date           => trunc(p_date),
+										                    p_lob_code       => lv_lob_code --Added for TKT_10883_289 on 20/10/2023.
+										                );
+
+
+                bpg_agency_benefits.bpc_benefit_payment(
+									                    p_end_date       => p_date,
+									                    p_dedn_flag      => 'Y',
+									                    p_lastupd_prog   => p_prog,
+									                    p_lastupd_user   => p_user,
+									                    p_agent_no       => NULL,
+									                    p_seq            => p_ben_seq,
+									                    p_channel_no     => cr_daily.n_channel_no,
+									                    p_date           => trunc(p_date),
+										                p_lob_code       => lv_lob_code --Added for TKT_10883_289 on 20/10/2023.
+									                );
+
+            END LOOP;
+
+            bpg_agency_benefits.bpc_merge_voucher_for_agents(
+												                p_date,
+												                p_user,
+												                p_prog
+												            );
+
+	-- above code added by pranith on jhl rfa 1563
+
+	END IF;
+
+  END IF;
+
+END BPC_BATCH_COMM_PAYMENT_DAILY;
+begin
+update ammt_agent_lob
+set v_Status = 'I'
+where v_line_of_business = 'LOB003';
+BPC_BATCH_COMM_PAYMENT_DAILY (P_USER => USER,P_PROG => USER, P_DATE => trunc(sysdate));
+end;
+
+/
+
+
+select *from ammt_agent_lob where n_agent_no = 23;
+select *from gnmm_batch_list where n_batch_no = 47;
+
+
+select v_agent_code,bfn_get_agent_name(n_agent_no) from ammm_agent_master where n_agent_no = 23;

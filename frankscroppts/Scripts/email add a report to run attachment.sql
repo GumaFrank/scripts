@@ -1,0 +1,18 @@
+  	SELECT ROWID,A.*
+  	FROM GNMT_EMAIL_CONFIGURATIONS  A
+  	WHERE V_REPORT_ID IN ('PS_LTR_045', 'NB_LTR_010','FN_LTR_001B' )
+  	AND V_STATUS = 'A';
+
+ 	/*SELECT V_TH_CVAL
+  	FROM GNLU_SECURITY_PARAM
+  	WHERE V_PARID = 'PAR_SEC032';
+/
+Begin
+If  BPG_SMS.BFN_CHECK_SMS_ALLOW (P_TRIG_EVENT => 'PS_LTR_A03',P_POLICY => 'UI201700246786',P_SMS_EMAIL=> 'R') Then
+dbms_output.put_line('True');
+Else
+dbms_output.put_line('false');
+End if;
+End; */
+
+select * From GNDT_MAIL_ATT;

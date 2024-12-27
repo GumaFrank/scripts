@@ -1,0 +1,69 @@
+select n_term,n_prem_pay_term,d_prem_paying_end_date,v_plan_code,n_net_contribution,d_prem_due_date,d_policy_end_date,d_next_out_date,d_commencement,v_cntr_stat_code,v_cntr_prem_stat_code,a.* from gnmt_policy a
+where v_policy_no='UI202000523130';
+select * from ppmt_overshort_payment  where v_policy_no='UI202000523130'  ;
+select * from ppdt_overshort_payment_det  where v_policy_no='UI202000523130'  ;
+select v_bill_no,d_prem_due_date,v_rec_status,sum(n_amt_called) from gndt_bill_ind_dets  where v_policy_no='UI202000523130' and v_rec_status<>'R'
+group by v_bill_no,d_prem_due_date,v_rec_status order by d_prem_due_date;
+select  sum(n_amt_called) from gndt_bill_ind_dets  where v_policy_no='UI202000523130' and v_rec_status<>'R';
+select  sum(n_receipt_amt) from remt_receipt  where v_policy_no='UI202000523130' and v_receipt_table='DETAIL'  and v_receipt_status='RE001';
+select 93000000-139982528 from dual; --1999636
+select 93000000/1999636 from dual; ---46
+select 1999636*3 from dual; --5998908
+select 5998908+1016744-1820012+1016744 from dual;--7015652
+select  93000000-(1999636*46) from dual;
+select 7015652+1016744 from dual;--7015652
+
+select 46*1999636 from dual;--91983256
+select  93000000-91983256 from dual;--1016744
+select months_between(to_date('25/05/2024','dd/mm/yyyy'),  to_date('25/06/2020','dd/mm/yyyy'))  from dual;
+
+
+
+
+
+
+declare
+
+lv_policy_no gnmt_policy.v_policy_no%type:='UI202000523130';
+
+begin
+
+
+
+bpg_grplife_billing.grp_appropriate_over_short(lv_policy_no,1,6212384,'O','HQ210160503','REVIVAL',sysdate,user,'JIRA_403');
+
+bpg_grplife_billing.bpc_raise_first_bill(	lv_policy_no,
+
+                   									'PB',
+
+                    								USER,
+
+                    								'JIRA_403_1',
+
+                    								trunc(sysdate),
+
+                    								NULL,
+
+                    								'N',
+
+                    								'G');
+
+bpg_grplife_billing.put_overpayment_in_holding(USER,
+
+												'JIRA_403_2',
+
+												trunc(sysdate),
+
+												lv_policy_no);
+
+bpg_grplife_billing.knock_dn_from_receipt_holding(USER,
+
+												'JIRA_403_3',
+
+												trunc(sysdate),
+
+												lv_policy_no);
+
+
+END;
+

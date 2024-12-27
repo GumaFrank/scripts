@@ -1,0 +1,137 @@
+troubleshooting wrongout standing commission 
+
+select n_term,n_prem_pay_term,d_prem_paying_end_date,v_plan_code,n_net_contribution,d_prem_due_date,d_policy_end_date,d_next_out_date,
+d_commencement,v_cntr_stat_code,v_cntr_prem_stat_code,a.* from gnmt_policy a
+where v_policy_no='UI201800313153';
+select * from ppmt_overshort_payment  where v_policy_no='UI201800313153'  ;
+select * from ppdt_overshort_payment_det  where v_policy_no='UI201800313153'  ;
+select v_bill_no,d_prem_due_date,v_rec_status,sum(n_amt_called) from gndt_bill_ind_dets  where v_policy_no='UI201800313153' and v_rec_status<>'R'
+group by v_bill_no,d_prem_due_date,v_rec_status order by d_prem_due_date;
+select  sum(n_amt_called) from gndt_bill_ind_dets  where v_policy_no='UI201900493550' and v_rec_status<>'R';
+select  sum(n_receipt_amt) from remt_receipt  where v_policy_no='UI201800313153' and v_receipt_table='DETAIL'  and v_receipt_status='RE001';
+select  6728000-6551622 from dual;
+select  176378+132861 from dual;--309239
+--7496350
+select 6728000/155991 from dual;
+select MONTHS_BETWEEN(to_date('30/04/2024','DD/MM/YYYY'),to_date('30/11/2020','DD/MM/YYYY'))FROM DUAL;
+--7500000
+SELECT 155991*41 from dual;--5615676
+select 176378-155991 from dual;
+-- how long was the Policy in Lapse  ( if the Policy was lapse for 3 Months), and the you redate, the 3 months should not come as Oustanding Premium
+-- then the premium Due Date should a future date after the Redate
+-- when did it get redate Flag
+
+
+
+
+
+select n_term,n_prem_pay_term,d_prem_paying_end_date,v_plan_code,n_net_contribution,d_prem_due_date,d_policy_end_date,d_next_out_date,d_commencement,v_cntr_stat_code,v_cntr_prem_stat_code,a.* from gnmt_policy a
+where v_policy_no='UI201900493550';
+select * from ppmt_overshort_payment  where v_policy_no='UI201900493550'  ;
+select * from ppdt_overshort_payment_det  where v_policy_no='UI201900493550'  ;
+select v_bill_no,d_prem_due_date,v_rec_status,sum(n_amt_called) from gndt_bill_ind_dets  where v_policy_no='UI201900493550' and v_rec_status<>'R'
+group by v_bill_no,d_prem_due_date,v_rec_status order by d_prem_due_date;
+select  sum(n_amt_called) from gndt_bill_ind_dets  where v_policy_no='UI201900493550' and v_rec_status<>'R';
+select  sum(n_receipt_amt) from remt_receipt  where v_policy_no='UI201900493550' and v_receipt_table='DETAIL'  and v_receipt_status='RE001';
+select  6728000-6551622 from dual;
+select  176378+132861 from dual;--309239
+--7496350
+select 6728000/155991 from dual;
+select MONTHS_BETWEEN(to_date('30/04/2024','DD/MM/YYYY'),to_date('30/11/2020','DD/MM/YYYY'))FROM DUAL;
+--7500000
+SELECT 155991*41 from dual;--5615676
+select 176378-155991 from dual;
+-- how long was the Policy in Lapse  ( if the Policy was lapse for 3 Months), and the you redate, the 3 months should not come as Oustanding Premium
+-- then the premium Due Date should a future date after the Redate
+-- when did it get redate Flag
+
+
+
+
+--6728000 received amount
+--155991
+select 6728000/155991 from dual;--43 dues
+select 43*155991 from dual; --6707613
+select 6728000-6707613 from dual;--20387
+
+--20387
+
+ select 5*155991+2*155991+20387-132861 from dual;
+ select  2*155991+20387 from dual; --after pd amount
+--prme amoutn 299854
+--recevied amount 7500000
+select 7500000/299854 from dual;--25 dues
+select 25*299854 from dual;  --7496350
+select 7500000-7496350 from dual;  --3650
+select 243796+7500000 from dual;
+ select 299854*3 from dual;
+select 899562+299854+3650 from dual;
+select 299854*3+299854+3650 -243796 from dual; --959270   50
+select  299854+3650 from dual;
+
+
+
+
+declare
+lv_policy_no gnmt_policy.v_policy_no%type:='UI201800313153';
+begin
+
+
+bpg_grplife_billing.grp_appropriate_over_short(lv_policy_no,1,959270,'O','HQ210043775','REVIVAL',sysdate,user,'JIRA_403');
+bpg_grplife_billing.bpc_raise_first_bill(	lv_policy_no,
+                   									'PB',
+                    								USER,
+                    								'JIRA_403_1',
+                    								trunc(sysdate),
+                    								NULL,
+                    								'N',
+                    								'G');
+
+bpg_grplife_billing.put_overpayment_in_holding(USER,
+												'JIRA_403_2',
+												trunc(sysdate),
+												lv_policy_no);
+
+bpg_grplife_billing.knock_dn_from_receipt_holding(USER,
+												'JIRA_403_3',
+												trunc(sysdate),
+												lv_policy_no);
+end;
+
+
+
+
+
+
+
+
+
+declare
+lv_policy_no gnmt_policy.v_policy_no%type:='UI201900493550';
+begin
+
+
+bpg_grplife_billing.grp_appropriate_over_short(lv_policy_no,1,979463,'O','HQ230191343','REVIVAL',sysdate,user,'JIRA_403');
+bpg_grplife_billing.bpc_raise_first_bill(	lv_policy_no,
+                   									'PB',
+                    								USER,
+                    								'JIRA_403_1',
+                    								trunc(sysdate),
+                    								NULL,
+                    								'N',
+                    								'G');
+
+bpg_grplife_billing.put_overpayment_in_holding(USER,
+												'JIRA_403_2',
+												trunc(sysdate),
+												lv_policy_no);
+
+bpg_grplife_billing.knock_dn_from_receipt_holding(USER,
+												'JIRA_403_3',
+												trunc(sysdate),
+												lv_policy_no);
+end;
+
+
+
+

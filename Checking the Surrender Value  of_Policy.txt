@@ -1,0 +1,30 @@
+--Checking the Surrender Value  of the Policy and coresspong Plan Code
+
+declare
+ln_csv number;
+begin
+bpg_csv.bpc_calc_paiduprt_csv(p_policy_no        => 'UI201900500981',
+          							 p_seq_no 	         => 1,
+          							 p_plancode 	     => 'BJIP001-B',
+          							 p_plan_rider_flag  => NULL,
+          							 p_proc_dt 	     => sysdate,
+          							 p_csv_val 	     => ln_csv);
+dbms_output.put_line('ln_csv-->'||ln_csv);
+end;
+
+--  Checking the Date
+select a.d_prem_due_date ,a.d_commencement, b.n_min_paid_months
+	from gnmt_policy a,psmm_surrender_duration b
+	where v_policy_no = 'UI202000522662'--UI201900500981
+	and a.v_plan_code = b.v_plan_code
+	and a.n_term between b.n_term_from and b.n_term_to;
+select * from gnmt_policy where v_policy_no='UI201900500981';
+select * from psmm_surrender_duration; --BFP003     
+
+select months_between(to_date('29/02/2024','dd/mm/yyyy'), 
+to_date('29/04/2021','dd/mm/yyyy')) from dual;-- Premium due date, commencemenft Date
+
+
+select V_POLICY_NO,D_COMMENCEMENT,D_PREM_DUE_DATE,SYSDATE from 
+gnmt_policy where v_plan_code='BJIP001-B' and v_cntr_stat_code='NB010' AND v_cntr_PREM_stat_code='NB010';
+

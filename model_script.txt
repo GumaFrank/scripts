@@ -1,0 +1,57 @@
+
+# Author Eng Bagambe Guma Frank
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load the data from the Excel file
+file_path = 'D:\model\MODEL_TEST.xlsx'  # Replace with your actual file path
+data = pd.read_excel(file_path)
+
+# Create a target variable 'Fraud' where 'True' represents a fraudulent claim (CLM_EVENT_CODE is null)
+data['Fraud'] = data['CLM_EVENT_CODE'].isnull()
+
+# Select only numeric columns for the features to simpli[fy the model training
+numeric_columns = data.select_dtypes(include=[int, float]).columns.tolist()
+X = data[numeric_columns]
+
+# The target variable is 'Fraud'
+y = data['Fraud']
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Initialize a Random Forest Classifier
+model = RandomForestClassifier(random_state=42)
+
+# Fill NaN values with zero and fit the model on the training data
+model.fit(X_train.fillna(0), y_train)
+
+# Predict on the testing set
+y_pred = model.predict(X_test.fillna(0))
+
+# Combine predictions with the claim numbers for the test set
+results = pd.DataFrame({
+    'Claim Number': data.loc[X_test.index, 'CLM_NO'],
+    'Actual Classification': ['Fraudulent' if x else 'Okay' for x in y_test],
+    'Predicted Classification': ['Fraudulent' if pred else 'Okay' for pred in y_pred]
+})
+
+# Print the classification report
+print(classification_report(results['Actual Classification'], results['Predicted Classification']))
+
+# Confusion Matrix
+cm = confusion_matrix(results['Actual Classification'], results['Predicted Classification'], labels=['Fraudulent', 'Okay'])
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Fraudulent', 'Okay'], yticklabels=['Fraudulent', 'Okay'])
+plt.title('Confusion Matrix')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.show()
+
+# Display the results table
+print(results)

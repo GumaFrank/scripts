@@ -1,0 +1,41 @@
+
+
+Select V_company_name,
+      --X.V_company_code,
+       V.V_name,
+       --v.n_cust_ref_no,
+       X.V_designation,
+       --  N_share_per,
+       -- X.V_iden_code,
+       (  Select -- v_policy_no,
+                 Rtrim (Xmlagg (Xmlelement (E,
+                                            V_add_one || '-',
+                                            V_add_two || '-',
+                                            V_post_box || '-',
+                                            V_postcode || ',')).Extract (
+                           '//text()'),
+                        ',')
+                    Riders
+            From Gndt_customer_address R
+           Where R.N_cust_ref_no = V.N_cust_ref_no
+        Group By N_cust_ref_no)
+          Postal_address,
+       X.V_iden_no Identification_no,
+       (Select V_iden_no
+          From Gndt_customer_identification Kk
+         Where Kk.N_cust_ref_no = V.N_cust_ref_no And Kk.V_iden_code = 'NIC')
+          Id,
+       (Select V_iden_no
+          From Gndt_customer_identification Kk
+         Where Kk.N_cust_ref_no = V.N_cust_ref_no And Kk.V_iden_code = 'PIN')
+          Pin
+  From Gnmt_beneficial_owner X,
+       Gnmm_company_master Y,
+       Gndt_customer_identification U,
+       Gnmt_customer_master V
+ Where     X.V_company_code = Y.V_company_code
+       And X.V_company_branch = Y.V_company_branch
+       And X.V_iden_no = U.V_iden_no
+       And U.N_cust_ref_no = V.N_cust_ref_no
+       --AND X.V_company_code = '1000201801'
+       Order By V_company_name

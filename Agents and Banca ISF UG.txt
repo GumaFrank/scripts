@@ -1,0 +1,108 @@
+/* Agents and Banca ISF UG */
+
+WITH kyc AS ( Select 
+Decode (N_channel_no,'10','AGENCY','BANCA') AS Channel,
+            C.V_ADD_THREE residence,
+            C.V_ADD_ONE postal_address,
+            --C.V_STATE_CODE nationality, 
+            D.V_NATION_CODE Nationality,
+A.V_agent_code,
+       B.V_name,
+       A.N_cust_ref_no,
+--       E.V_ACCOUNT_NO,
+--       E.V_BRANCH_CODE Branch_Name,
+--       E.V_BANK_CODE,
+       (Select W.V_agent_status_desc
+          From Ammm_agent_status W
+         Where W.V_agent_status_code = A.V_status)
+          Agent_status_desc,
+       (Select V_iden_no
+          From Gndt_customer_identification K
+         Where     V_iden_code in ( 'NIC','OT')
+               And N_cust_ref_no = A.N_cust_ref_no
+               And Rownum = 1)
+          V_iden_no,
+       (Select V_iden_no
+          From Gndt_customer_identification
+         Where     V_iden_code = 'PIN'
+               And N_cust_ref_no = A.N_cust_ref_no
+               And Rownum = 1)
+          Pin,
+       (Select Q.V_contact_number
+          From Gndt_custmobile_contacts Q
+         Where     A.N_cust_ref_no = Q.N_cust_ref_no
+               And Q.V_contact_number Like '%@%'
+               And Rownum = 1)
+          Email,
+       (Select V_contact_number
+          From Gndt_custmobile_contacts
+         Where     N_cust_ref_no = A.N_cust_ref_no
+               And V_contact_number Not Like '%@%'
+               And V_status = 'A'
+               And Rownum = 1)
+          Contact,
+       (Select                                                 -- v_policy_no,
+              Rtrim (
+                  Xmlagg (Xmlelement (E, V_remarks || ',')).Extract (
+                     '//text()'),
+                  ',')
+                  Ira_licence_no
+          From Amdt_agent_education X, Ammm_education_master Y
+         Where     N_agent_no = A.N_agent_no
+               And X.V_education_code = Y.V_education_code
+               And X.V_education_code = 'IRA')
+          Ira_licence_no,
+       (Select                                                 -- v_policy_no,
+              Rtrim (
+                  Xmlagg (Xmlelement (E, D_due_date || ',')).Extract (
+                     '//text()'),
+                  ',')
+                  Ira_expiry_date
+          From Amdt_agents_training X, Ampl_training_master Y
+         Where     N_agent_no = A.N_agent_no
+               And X.N_training_no = Y.N_training_no
+               And X.N_training_no = 1)
+          Ira_expiry_date,
+           (Select                                                 -- v_policy_no,
+              Rtrim (
+                  Xmlagg (Xmlelement (E, V_remarks || ',')).Extract (
+                     '//text()'),
+                  ',')
+                  Aki_Provisional_License
+          From Amdt_agent_education X, Ammm_education_master Y
+         Where     N_agent_no = A.N_agent_no
+               And X.V_education_code = Y.V_education_code
+               And X.V_education_code = 'AKI-P')
+          Aki_Provisional_License,
+       (Select                                                 -- v_policy_no,
+              Rtrim (
+                  Xmlagg (Xmlelement (E, D_due_date || ',')).Extract (
+                     '//text()'),
+                  ',')
+                  Aki_expiry_date
+          From Amdt_agents_training X, Ampl_training_master Y
+         Where     N_agent_no = A.N_agent_no
+               And X.N_training_no = Y.N_training_no
+               And X.N_training_no = 2)
+          Aki_expiry_date
+  From Ammm_agent_master A
+  INNER JOIN Gnmt_customer_master B ON A.N_cust_ref_no = B.N_cust_ref_no
+ INNER JOIN Gndt_customer_address C ON A.N_cust_ref_no = C.N_cust_ref_no
+	INNER JOIN GNMT_CUSTOMER_MASTER D  on A.N_cust_ref_no = D.N_cust_ref_no)
+-- Where     
+-- A.N_cust_ref_no = B.N_cust_ref_no
+--          And  A.N_cust_ref_no = C.N_cust_ref_no
+--          and A.N_cust_ref_no = D.N_cust_ref_no
+----          AND A.N_cust_ref_no = E.N_cust_ref_no
+          --And A.V_AGENT_CODE = G.V_AGENT_CODE
+       --And A.V_agent_code In ('1131','1132', '1238','1266','1380')/
+       --AND V_AGENT_CODE='2790'
+       -- C.V_CORRES_ADDRESS='Y'
+      -- And N_channel_no <> 30
+--       And n_agent_no in (select n_agent_no from Amdt_agents_training) order by n_channel_no, v_agent_code)
+          SELECT * FROM kyc Z LEFT JOIN (SELECT V_ACCOUNT_NO, N_CUST_REF_NO,V_BRANCH_CODE Branch_Name, V_BANK_CODE  FROM gndt_customer_bank )E ON Z.N_CUST_REF_NO = E.N_CUST_REF_NO
+                    WHERE AGENT_STATUS_DESC = ('Active')
+          
+--          SELECT * FROM Gndt_customer_address
+--          SELECT * FROM Gnmt_customer_master
+--          SELECT * FROM Ammm_agent_master

@@ -1,0 +1,80 @@
+begin
+--- Module already created so no need to call it every time
+   ORDS.define_module(
+    p_module_name    => 'ISFLIFE',
+    p_base_path      => 'services/',
+--    p_pattern        => the module name followed by the webservice name
+    p_items_per_page => 0);
+ 
+ 
+    ORDS.define_template(
+       p_module_name    => 'ISFLIFE',
+       p_pattern        => 'finance/v1/RequestForIssuingReceipt');
+ 
+ 
+      ORDS.define_handler(
+        p_module_name    => 'ISFLIFE',
+        p_pattern        => 'finance/v1/RequestForIssuingReceipt',
+        p_method         => 'POST',
+        p_source_type    => ORDS.source_type_plsql,
+        p_source         => 'BEGIN
+                               REST_BPG_COLLECTION_SERVICE.REST_BFN_RECEIPT_SRV_REQUEST(p_body=>:body);
+                             END;',
+        p_items_per_page => 0);
+ 
+    commit;
+
+ 
+end;
+
+
+begin
+ 
+    ORDS.define_template(
+       p_module_name    => 'ISFLIFE',
+       p_pattern        => 'finance/v1/FirstBillOfThePolicy');
+ 
+ 
+      ORDS.define_handler(
+        p_module_name    => 'ISFLIFE',
+        p_pattern        => 'finance/v1/FirstBillOfThePolicy',
+        p_method         => 'POST',
+        p_source_type    => ORDS.source_type_plsql,
+        p_source         => 'BEGIN
+                               REST_BPG_PP_FRM_11_OUTSTANDING.REST_GNDT_FIRST_BILL(p_body=>:body);
+                             END;',
+        p_items_per_page => 0);
+ 
+    commit;
+
+ 
+end;
+
+
+
+begin
+ 
+    ORDS.define_template(
+       p_module_name    => 'ISFLIFE',
+       p_pattern        => 'newBusiness/v1/ToRetrievePolicyCurrentStatus');
+ 
+ 
+      ORDS.define_handler(
+        p_module_name    => 'ISFLIFE',
+        p_pattern        => 'newBusiness/v1/ToRetrievePolicyCurrentStatus',
+        p_method         => 'POST',
+        p_source_type    => ORDS.source_type_plsql,
+        p_source         => 'BEGIN
+                               REST_BPG_PP_FRM_11_OUTSTANDING.REST_POLICY_CURRENT_STATUS(p_body=>:body);
+                             END;',
+        p_items_per_page => 0);
+ 
+    commit;
+
+ 
+end;
+
+
+
+
+

@@ -1,0 +1,6 @@
+"REM WORKSPACETAB0",Query1,,1
+select * from AMMT_POL_COMM_DETAIL where V_POLICY_NO ='UG202401065602' order by 5 desc ;
+"REM WORKSPACETAB1",Query2,,1
+select * from AMDT_AGENT_BENEFIT_POOL_DETAIL where N_AGENT_NO ='1452' order by 1 desc ;
+"REM WORKSPACETAB2",Query3,,1
+select * from AMDT_AGENT_BENE_POOL_PAYMENT where N_AGENT_NO ='1452' order by 1 desc ;

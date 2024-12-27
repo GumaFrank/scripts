@@ -1,0 +1,260 @@
+/* Formatted on 20/02/2020 18:11:53 (QP5 v5.256.13226.35538) */
+
+SELECT * FROM
+(
+  SELECT V_Agent_Code,
+         Agent_Name,
+         Designation,
+         Agency,
+         Trans_Date,
+         Trans_Date2,
+         V_Policy_No,
+         N_Seq_No,
+         V_Plan_Desc,
+         Policy_Owner,
+         Policy_Year,
+         D_Premium_Due,
+         V_Override,
+         Sub_Agent_Code,
+         SUM (Premium_Amt) Premium_Amt,
+         SUM (N_Comm_Amt) N_Comm_Amt,
+         SUM (N_Wht) N_Wht,
+         SUM (N_Net_Comm) N_Net_Comm,
+		 N_VOUCHER_NO
+    FROM (SELECT A.N_Agent_No,
+                 V_Agent_Code,
+                 D.V_Name Agent_Name,
+                 V_Description Designation,
+                 NULL Agency,
+                 A.V_Plan_Code,
+                 J.V_Plan_Desc,
+                 D_Comm_Gen Trans_Date,
+                 G.D_Trans_Date Trans_Date2,
+                 A.V_Policy_No,
+                 A.N_Seq_No,
+                 B.V_Name Assured_Name,
+                 (SELECT V_Name
+                    FROM Gnmt_Customer_Master X, Gnmt_Policy Y
+                   WHERE     X.N_Cust_Ref_No = Y.N_Payer_Ref_No
+                         AND Y.V_Policy_No = A.V_Policy_No)
+                    Policy_Owner,
+                 N_Comm_Year Policy_Year,
+                 D_Premium_Due,
+                 N_Prem_Amt Premium_Amt,
+                 V_Receipt_No,
+                 N_Comm_Amt,
+                 N_Comm_Rate,
+                 NVL (V_Income_Tax_Rule_Ref, 0) / 100 * N_Comm_Amt N_Wht,
+                 N_Comm_Amt - NVL (V_Income_Tax_Rule_Ref, 0) / 100 * N_Comm_Amt
+                    N_Net_Comm,
+                 V_Oc_Flag V_Override,
+                 Bpg_Agency.Bfn_Get_Agent_Code (N_Sub_Agent_No) Sub_Agent_Code,
+				 H.N_VOUCHER_NO
+            FROM Ammt_Pol_Comm_Detail A,
+                 Gnmt_Policy_Detail B,
+                 Ammm_Agent_Master C,
+                 Gnmt_Customer_Master D,
+                 Ammm_Rank_Master F,
+                 Amdt_Agent_Benefit_Pool_Detail G,
+                 Amdt_Agent_Bene_Pool_Payment H,
+                 Gnmm_Plan_Master J
+           WHERE     V_Comm_Status IN ('P')
+                 AND A.V_Policy_No = B.V_Policy_No
+                 AND A.N_Seq_No = B.N_Seq_No
+                 AND A.N_Agent_No = C.N_Agent_No
+                 AND C.N_Cust_Ref_No = D.N_Cust_Ref_No
+                 AND C.V_Rank_Code = F.V_Rank_Code
+                 AND C.N_Channel_No = F.N_Channel_No
+                 --And  H.D_Trans_Date Between :From_Date And :To_Date
+                 --AND TRUNC(H.D_Trans_Date) BETWEEN TO_DATE(?,'DD/MM/YYYY') AND TO_DATE(?,'DD/MM/YYYY')
+                 AND TRUNC (NVL (H.D_TRANS_DATE, SYSDATE)) BETWEEN NVL (
+                                                                      :P_FM_DT,
+                                                                      TRUNC (
+                                                                         NVL (
+                                                                            H.D_TRANS_DATE,
+                                                                            SYSDATE)))
+                                                               AND NVL (
+                                                                      :P_TO_DT,
+                                                                      TRUNC (
+                                                                         NVL (
+                                                                            H.D_TRANS_DATE,
+                                                                            SYSDATE)))
+                 AND G.V_Trans_Source_Code IN ('COMMISSION',
+                                               'COMMISSION REVERSAL')
+                 AND V_Accounted = 'Y'
+                 AND A.V_Plan_Code = J.V_Plan_Code
+                 AND A.N_Comm_Benefit_Pool_Seq_No = G.N_Benefit_Pool_Seq_No
+                 AND G.N_Benefit_Pool_Pay_Seq(+) = H.N_Benefit_Pool_Pay_Seq)
+GROUP BY V_Agent_Code,
+         Agent_Name,
+         Designation,
+         Agency,
+         Trans_Date,
+         Trans_Date2,
+         V_Policy_No,
+         N_Seq_No,
+         V_Plan_Desc,
+         Assured_Name,
+         Policy_Owner,
+         Policy_Year,
+         D_Premium_Due,
+         V_Override,
+         Sub_Agent_Code,N_VOUCHER_NO
+UNION
+  SELECT V_Agent_Code,
+         Agent_Name,
+         Designation,
+         Agency,
+         Trans_Date,
+         Trans_Date2,
+         V_Policy_No,
+         N_Seq_No,
+         V_Plan_Desc,
+         Policy_Owner,
+         Policy_Year,
+         D_Premium_Due,
+         V_Override,
+         Sub_Agent_Code,
+         SUM (Premium_Amt) Premium_Amt,
+         SUM (N_Comm_Amt) N_Comm_Amt,
+         SUM (N_Wht) N_Wht,
+         SUM (N_Net_Comm) N_Net_Comm,
+		 N_VOUCHER_NO
+    FROM (SELECT A.N_Agent_No,
+                 V_Agent_Code,
+                 D.V_company_name Agent_Name,
+                 V_Description Designation,
+                 NULL Agency,
+                 A.V_Plan_Code,
+                 J.V_Plan_Desc,
+                 D_Comm_Gen Trans_Date,
+                 G.D_Trans_Date Trans_Date2,
+                 A.V_Policy_No,
+                 A.N_Seq_No,
+                 B.V_Name Assured_Name,
+                 (SELECT V_Name
+                    FROM Gnmt_Customer_Master X, Gnmt_Policy Y
+                   WHERE     X.N_Cust_Ref_No = Y.N_Payer_Ref_No
+                         AND Y.V_Policy_No = A.V_Policy_No)
+                    Policy_Owner,
+                 N_Comm_Year Policy_Year,
+                 D_Premium_Due,
+                 N_Prem_Amt Premium_Amt,
+                 V_Receipt_No,
+                 N_Comm_Amt,
+                 N_Comm_Rate,
+                 NVL (V_Income_Tax_Rule_Ref, 0) / 100 * N_Comm_Amt N_Wht,
+                 N_Comm_Amt - NVL (V_Income_Tax_Rule_Ref, 0) / 100 * N_Comm_Amt
+                    N_Net_Comm,
+                 V_Oc_Flag V_Override,
+                 Bpg_Agency.Bfn_Get_Agent_Code (N_Sub_Agent_No) Sub_Agent_Code,
+				 H.N_VOUCHER_NO
+            FROM Ammt_Pol_Comm_Detail A,
+                 Gnmt_Policy_Detail B,
+                 Ammm_Agent_Master C,
+                 Gnmm_company_master D,
+                 Ammm_Rank_Master F,
+                 Amdt_Agent_Benefit_Pool_Detail G,
+                 Amdt_Agent_Bene_Pool_Payment H,
+                 Gnmm_Plan_Master J
+           WHERE     V_Comm_Status IN ('P')
+                 AND A.V_Policy_No = B.V_Policy_No
+                 AND A.N_Seq_No = B.N_Seq_No
+                 AND A.N_Agent_No = C.N_Agent_No
+                 AND C.V_company_code = D.V_company_code
+                 AND C.V_company_branch = D.V_company_branch
+                 AND C.V_Rank_Code = F.V_Rank_Code
+                 AND C.N_Channel_No = F.N_Channel_No
+                 --And  TRUNC(H.D_Trans_Date) Between :From_Date And :To_Date
+                 --AND TRUNC(H.D_Trans_Date) BETWEEN TO_DATE(?,'DD/MM/YYYY') AND TO_DATE(?,'DD/MM/YYYY')
+                 AND TRUNC (NVL (H.D_TRANS_DATE, SYSDATE)) BETWEEN NVL (
+                                                                      :P_FM_DT,
+                                                                      TRUNC (
+                                                                         NVL (
+                                                                            H.D_TRANS_DATE,
+                                                                            SYSDATE)))
+                                                               AND NVL (
+                                                                      :P_TO_DT,
+                                                                      TRUNC (
+                                                                         NVL (
+                                                                            H.D_TRANS_DATE,
+                                                                            SYSDATE)))
+                 AND G.V_Trans_Source_Code IN ('COMMISSION',
+                                               'COMMISSION REVERSAL')
+                 AND V_Accounted = 'Y'
+                 AND A.V_Plan_Code = J.V_Plan_Code
+                 AND A.N_Comm_Benefit_Pool_Seq_No = G.N_Benefit_Pool_Seq_No
+                 AND G.N_Benefit_Pool_Pay_Seq(+) = H.N_Benefit_Pool_Pay_Seq
+                 AND G.V_lob_code IN ('LOB001', 'LOB005'))
+GROUP BY V_Agent_Code,
+         Agent_Name,
+         Designation,
+         Agency,
+         Trans_Date,
+         Trans_Date2,
+         V_Policy_No,
+         N_Seq_No,
+         V_Plan_Desc,
+         Assured_Name,
+         Policy_Owner,
+         Policy_Year,
+         D_Premium_Due,
+         V_Override,
+         Sub_Agent_Code,N_VOUCHER_NO
+ORDER BY V_Policy_No
+
+) WHERE --V_AGENT_CODE ='A0003496' AND
+v_policy_no IN
+('UI202401095411', 'UI202401095131',
+    'UI202401094685', 'UI202401098874',
+    'UI202401094136', 'UI202401098384',
+    'UI202401100344', 'UI202401098852',
+    'UI202401098395', 'UI202401094862',
+    'UI202401100226', 'UI202401099003',
+    'UI202401100241', 'UI202401100230',
+    'UI202401103796', 'UI202401100112',
+    'UI202401103763', 'UI202401095186',
+    'UI202401103623', 'UI202401100020',
+    'UI202401100252', 'UI202401098885',
+    'UI202401098981', 'UI202401100311',
+    'UI202401100215', 'UI202401099972',
+    'UI202401101475', 'UI202401101512',
+    'UI202401101416', 'UI202401101431',
+    'UI202401098900', 'UI202401098896',
+    'UI202401099025', 'UI202401101976',
+    'UI202401101873', 'UI202401101663',
+    'UI202401098933', 'UI202401102002',
+    'UI202401101700', 'UI202401101696',
+    'UI202401099994', 'UI202401103660',
+    'UI202401101722', 'UI202401100355',
+    'UI202401103424', 'UI202401101954',
+    'UI202401101685', 'UI202401100263',
+    'UI202401105550', 'UI202401101836',
+    'UI202401101803', 'UI202401101814',
+    'UI202401103741', 'UI202401101932',
+    'UI202401102422', 'UI202401103925',
+    'UI202401098922', 'UI202401103914',
+    'UI202401094696', 'UI202401101711',
+    'UI202401103962', 'UI202401102260',
+    'UI202401102385', 'UI202401102326',
+    'UI202401102330', 'UI202401101394',
+    'UI202401104021', 'UI202401103730',
+    'UI202401103892', 'UI202401104076',
+    'UI202401103870', 'UI202401102455',
+    'UI202401103704', 'UI202401102363',
+    'UI202401101674', 'UI202401104614',
+    'UI202401104581', 'UI202401103855',
+    'UI202401104032', 'UI202401104570',
+    'UI202401103833', 'UI202401104566',
+    'UI202401104625', 'UI202401104640',
+    'UI202401104592', 'UI202401104636',
+    'UI202401105782', 'UI202401106191',
+    'UI202401105745', 'UI202401106073',
+    'UI202401104522', 'UI202401105535',
+    'UI202401103822', 'UI202401104695',
+    'UI202401106110', 'UI202401106143',
+    'UI202401104651', 'UI202401106250',
+    'UI202401103505', 'UI202401105756',
+    'UI202401105631', 'UI202401085235',
+    'UI202401094000', 'UI202401101910'
+  );

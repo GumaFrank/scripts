@@ -1,0 +1,13 @@
+select * from PSMT_SMS_MASTER
+
+Revival
+Final reminder to pay premium
+Auto debit Successful
+Policy Issuance
+Premium Notice
+
+
+
+SELECT * FROM GNMT_BATCH_EXE_TRACE WHERE D_BATCH_DATE = '30-NOV-2023'
+
+exec bpg_maturity.bpc_generate_maturity (user,user,sysdate,sysdate)

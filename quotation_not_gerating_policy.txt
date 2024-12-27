@@ -1,0 +1,15 @@
+UPDATE gnmt_quotation SET v_quot_backup_type = NULL
+ where  v_quotation_id = '206911';
+
+
+
+SELECT v_quotation_id,v_quot_backup_type,v_cntr_stat_Code,v_policy_no FROM gnmt_quotation where v_quotation_id = '206911';
+ 202944 --WORKEN ON IN THE PAST
+
+ 206911 -- NOT WORKING;
+
+
+ select * from GNMM_POLICY_STATUS_MASTER where v_status_code = 'NB203';
+
+ UPDATE gnmt_quotation SET v_quot_backup_type = NULL
+ where  v_quotation_id = '206911';

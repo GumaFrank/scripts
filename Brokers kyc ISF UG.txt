@@ -1,0 +1,31 @@
+/*  Brokers kyc ISF UG  */ 
+
+
+SELECT
+distinct
+    a.n_agent_no,
+    a.v_agent_code,
+    bfn_get_agent_name(n_agent_no)agent_name,
+    d.V_IDEN_NO,
+    d.mobile,
+    d.EMAIL ,
+    C.V_REGN_NO,
+    b.V_AGENT_STATUS_DESC,
+    C.V_COMP_GROUP_CODE CERTIFICATE_NO , 
+    E.V_ACCOUNT_NO ,
+    E.V_COMPANY_BRANCH,
+    E.V_BRANCH_CODE 
+FROM
+ ammm_agent_master a
+    left join AMMM_AGENT_STATUS b on a.v_status = b.V_AGENT_STATUS_CODE
+    LEFT join JHLISFUADM.VW_AGENT_CONTACTS d on d.V_AGENT_CODE = a.V_AGENT_CODE
+        left join GNMM_COMPANY_MASTER c on c.V_COMPANY_CODE = D.V_IDEN_NO
+        LEFT JOIN gndt_company_bank  E ON c.V_COMPANY_CODE = E.V_COMPANY_CODE 
+WHERE  N_CHANNEL_NO = 30
+
+--SELECT * FROM  JHLISFUADM.VW_AGENT_CONTACTS
+
+--SELECT * FROM gndt_company_bank --bankdetails
+--SELECT * FROM  ammm_agent_master
+--SELECT * FROM GNMM_COMPANY_MASTER
+--select * from VW_AGENT_CONTACTS

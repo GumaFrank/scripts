@@ -1,0 +1,62 @@
+"REM WORKSPACETAB0",Query1,,13
+--7835
+-- 1152
+select *from ammm_agent_master where n_agent_no = 5802;
+
+select *from amdt_agent_benefit_pool_detail where n_agent_no = A0003995 order by 1 desc;
+select *from ammt_agent_benefit_pool where n_agent_no = 7835; ---1308888.77
+select * from ammt_pol_comm_detail where n_agent_no = 7835
+and n_comm_benefit_pool_seq_no = 519665 order by n_comm_seq;
+select *from ammt_pol_comm_detail where n_agent_no = 7835
+and n_comm_benefit_pool_seq_no = 519666 order by n_comm_seq;
+
+
+1152
+"REM WORKSPACETAB1",Query3,,1
+A0003995
+"REM WORKSPACETAB2",Query2,,5
+select *from ammt_commission_intimation where v_policy_no = 'UI202401156591' and v_comm_process_code in ('G','C') order by 1;
+select *from gnlu_prog_master where v_prog_id = 'PSN_FRM_27'; --Group Cancellation
+select *from gnmt_policy where v_policy_no = 'UI202401156591';
+select *from gnmm_policy_status_master where v_status_code = 'NB105';
+select *from ammt_pol_comm_detail where v_policy_no = 'UI202401156591' order by n_comm_Seq;
+"REM WORKSPACETAB3",Query4,,12
+SELECT * FROM ppdt_overshort_payment_det WHERE v_policy_no ='UG201700257323' ORDER BY d_posted_date DESC ;
+
+select * from psdt_termination where v_policy_no = 'UG202000523550' order by n_seq_no;   ---UG202000523550
+
+select SUM(N_BILL_AMT),v_bill_type,n_seq_no from GNMT_RAISE_BILL_REQUEST where V_POLICY_NO = 'UG202000523550' and N_SEQ_NO IN(
+select N_SEQ_NO from psdt_termination where v_policy_no = 'UG202000523550')
+group by v_bill_type,n_seq_no order by n_seq_no;
+
+select * from GNMT_RAISE_BILL_REQUEST where V_POLICY_NO = 'UG202000523550' and N_SEQ_NO IN(
+select N_SEQ_NO from psdt_termination where v_policy_no = 'UG202000523550')  and v_bill_type = 'CN'
+and TRUNC(D_LASTUPD_INFTIM)= TO_DATE('07/25/2024','mm/dd/yyyy')
+ order by n_seq_no;
+"REM WORKSPACETAB4",Query6,,10
+ /
+ A0003995
+ 2024019116
+ 5,612,171.91
+
+ UG201700257323
+ /;
+
+ select * from gnmt_quotation where v_policy_no ='UG201700257323' order by V_QUOTATION_ID asc ;
+
+"REM WORKSPACETAB5",Query8,,2
+select V_QUOTATION_ID, V_QUOT_BACKUP_TYPE, V_NET_PAYMENT_OPTION,V_LASTUPD_PROG from gnmt_quotation where v_policy_no ='UG201700257323'
+order by TO_NUMBER(V_QUOTATION_ID)  ;
+"REM WORKSPACETAB6",Query5,,10
+---DEP391449
+
+SELECT * FROM GNDT_BILL_IND_DETS_TRANS WHERE V_REF_NO='DEP391449';
+--DEP391449
+
+select *from gndt_bill_ind_dets_amt     
+
+
+
+
+"REM WORKSPACETAB7",Query7,,1
+SELECT * FROM ppmt_receipt_holding_account WHERE v_receipt_no ='DEP391450';

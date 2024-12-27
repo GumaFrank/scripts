@@ -1,0 +1,1 @@
+select * from GNMM_Approval_limit_group where   N_TO_AMT ='1652786402';

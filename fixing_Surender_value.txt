@@ -1,0 +1,36 @@
+declare
+lv_policy_no gnmt_policy.v_policy_no%type:='UI202000522662';
+begin
+
+bpg_grplife_billing.grp_appropriate_over_short(lv_policy_no,1,600000,'O','HQ230005143','RECEIPT',sysdate,user,'JHLU_82');
+bpg_grplife_billing.bpc_raise_first_bill(	lv_policy_no,
+                   									'PB',
+                    								USER,
+                    								'JHLU_11038-82',
+                    								trunc(sysdate),
+                    								NULL,
+                    								'N',
+                    								'G');
+
+bpg_grplife_billing.put_overpayment_in_holding(USER,
+												'JHLU_11038-82',
+												trunc(sysdate),
+												lv_policy_no);
+
+bpg_grplife_billing.knock_dn_from_receipt_holding(USER,
+												'JHLU_11038-82',
+												trunc(sysdate),
+												lv_policy_no);
+
+
+
+END;
+/
+select sum(n_receipt_amt) from remt_receipt where v_policy_no='UI202000522662'
+and v_receipt_table='DETAIL' and V_RECEIPT_STATUS='RE001';--7600000
+SELECT SUM(N_AMT_CALLED) FROM GNDT_BILL_IND_DETS where v_policy_no='UI202000522662' AND V_REC_STATUS='Y';--13000000
+SELECT d_prem_due_date,v_rec_status,SUM(N_AMT_CALLED) FROM GNDT_BILL_IND_DETS where v_policy_no='UI202000522662' AND V_REC_STATUS<>'R'
+group by d_prem_due_date,v_rec_status order by 1;--13000000
+select 7600000-12400000,200000*36 from dual;
+select * from GNMT_POLICY where v_policy_no='UI202000522662';
+select * from PPMT_OVERSHORT_PAYMENT where v_policy_no='UI202000522662' order by 5;

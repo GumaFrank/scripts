@@ -1,0 +1,4 @@
+select * from gndt_bill_ind_dets where v_policy_no='UI201700249601' and v_rec_status<>'R' order by 4;
+select * from psmt_policy_revival where v_policy_no='UI201700249601'   order by 4;
+select * from psdt_redate_detail where v_policy_no='UI201700249601'   order by 4;
+select * from ppmt_overshort_payment where v_policy_no='UI201700249601'   order by 4;

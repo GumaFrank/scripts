@@ -1,0 +1,19 @@
+"REM WORKSPACETAB0",Query1,,12
+--7835
+-- 1152
+select *from ammm_agent_master where n_agent_no = 1152;
+select *from amdt_agent_benefit_pool_detail where n_agent_no = 7835 order by 1 desc;
+select *from ammt_agent_benefit_pool where n_agent_no = 7835; ---1308888.77
+select * from ammt_pol_comm_detail where n_agent_no = 7835
+and n_comm_benefit_pool_seq_no = 519665 order by n_comm_seq;
+select *from ammt_pol_comm_detail where n_agent_no = 7835
+and n_comm_benefit_pool_seq_no = 519666 order by n_comm_seq;
+
+
+1152
+"REM WORKSPACETAB1",Query2,,5
+select *from ammt_commission_intimation where v_policy_no = 'UI202401156591' and v_comm_process_code in ('G','C') order by 1;
+select *from gnlu_prog_master where v_prog_id = 'PSN_FRM_27'; --Group Cancellation
+select *from gnmt_policy where v_policy_no = 'UI202401156591';
+select *from gnmm_policy_status_master where v_status_code = 'NB105';
+select *from ammt_pol_comm_detail where v_policy_no = 'UI202401156591' order by n_comm_Seq;

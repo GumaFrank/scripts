@@ -1,0 +1,150 @@
+Prepared By Eng. Frank Bagambe 
+
+Sending Transaction to gl_interface
+
+BEGIN
+    JHL_OFA_UTILS_1.SEND_GL_TRANS_TO_OFA;
+END;
+
+
+
+
+
+
+begin
+    JHL_OFA_UTILS_1.OFA_GL_TRANS_PROC();
+end;
+
+understanding  OFA_GL_TRANS_PROC();
+
+Procedure: OFA_GL_TRANS_PROC
+The procedure OFA_GL_TRANS_PROC is responsible for orchestrating several processes related to general ledger (GL) transactions. Here is a detailed explanation of what this procedure does:
+
+Purpose: The procedure coordinates the creation, transformation, and sending of GL transactions to the OFA system.
+
+Flow:
+
+Initialization:
+
+V_START_DATE is set to the current system date (SYSDATE).
+Calling Other Procedures:
+
+CREATE_OFA_RECEIVABLE_TRANS: This procedure is responsible for creating receivable transactions. It likely selects data from relevant tables and inserts it into the JHL_OFA_GL_TRANSACTIONS table.
+TRANSFORM_OFA_RECEIVABLE_TRANS: This procedure transforms the created receivable transactions to prepare them for posting to the GL interface.
+TRANSFORM_OFA_GL_TRANS: This procedure transforms general ledger transactions. It includes selecting and processing transactions from JHL_OFA_GL_TRANSACTIONS.
+SEND_GL_TRANS_TO_OFA: This procedure sends the transformed GL transactions to the APPS.GL_INTERFACE@JICOFPROD.COM.
+Logging Job Details:
+
+After completing the process, it inserts a record into the JHL_OFA_JOBS table to log the job details including job ID, name, start date, and end date.
+Commit:
+
+The procedure commits the transaction to ensure all changes are saved.
+
+
+
+
+
+troubleshooting 
+
+If the procedure OFA_GL_TRANS_PROC runs successfully but the data does not appear in 
+APPS.GL_INTERFACE@JICOFPROD.COM, you should troubleshoot by checking the following steps and points within the process:
+
+1. Verify Data in Intermediate Tables
+Step: Check Data in JHL_OFA_GL_TRANSACTIONS
+Ensure that the data intended for transfer is present in JHL_OFA_GL_TRANSACTIONS.
+
+SELECT * FROM JHL_OFA_GL_TRANSACTIONS WHERE <conditions>;
+
+ Step: Check Data in JHL_OFA_GL_INTERFACE
+Confirm that the data has been successfully moved from JHL_OFA_GL_TRANSACTIONS to JHL_OFA_GL_INTERFACE.
+
+SELECT * FROM JHL_OFA_GL_INTERFACE WHERE OGLI_PROCESSED = 'Y' AND OGLI_POSTED = 'N';
+
+
+
+2. Verify Transformation Procedures
+Procedure: CREATE_OFA_RECEIVABLE_TRANS
+Check if this procedure correctly creates entries in JHL_OFA_GL_TRANSACTIONS.
+Procedure: TRANSFORM_OFA_RECEIVABLE_TRANS
+Verify that this procedure correctly transforms the data for further processing.
+Procedure: TRANSFORM_OFA_GL_TRANS
+Ensure that the transformation logic is correctly moving data from JHL_OFA_GL_TRANSACTIONS to JHL_OFA_GL_INTERFACE.
+
+3. Verify the Sending Procedure
+Procedure: SEND_GL_TRANS_TO_OFA
+Confirm that this procedure is correctly sending data to APPS.GL_INTERFACE@JICOFPROD.COM.
+Check for any errors or issues during the insert operation.
+
+SELECT * FROM APPS.GL_INTERFACE@JICOFPROD.COM WHERE <conditions>;
+
+
+4. Check Database Links
+Database Link: JICOFPROD.COM
+Verify that the database link JICOFPROD.COM is correctly configured and operational.
+Ensure that you have the necessary privileges to use the database link.
+
+
+SELECT 1 FROM DUAL@JICOFPROD.COM;
+
+5. Check Logs and Error Messages
+Check Oracle Alert Log and Trace Files
+Look for any relevant error messages or issues that might have been logged during the procedure execution.
+Check Application Logs
+If applicable, check any application-level logs for errors or warnings related to the procedure execution.
+
+
+6. Check Data Consistency and Constraints
+Data Constraints
+Ensure that there are no data constraint violations preventing the data from being inserted into APPS.GL_INTERFACE.
+
+
+
+
+Troubleshooting Steps Recap:
+Intermediate Data Check:
+
+Verify data in JHL_OFA_GL_TRANSACTIONS.
+Verify data in JHL_OFA_GL_INTERFACE.
+Transformation Procedures Check:
+
+CREATE_OFA_RECEIVABLE_TRANS
+TRANSFORM_OFA_RECEIVABLE_TRANS
+TRANSFORM_OFA_GL_TRANS
+Sending Procedure Check:
+
+SEND_GL_TRANS_TO_OFA
+Database Link Verification:
+
+JICOFPROD.COM
+Logs and Error Messages:
+
+Oracle alert logs and trace files.
+Application logs.
+Data Consistency and Constraints:
+
+Ensure no constraint violations.
+
+
+
+Queries for Troubleshooting
+
+Verify Data in Intermediate Tables
+-- Check data in JHL_OFA_GL_TRANSACTIONS
+SELECT * FROM JHL_OFA_GL_TRANSACTIONS WHERE <conditions>;
+
+-- Check data in JHL_OFA_GL_INTERFACE
+SELECT * FROM JHL_OFA_GL_INTERFACE WHERE OGLI_PROCESSED = 'Y' AND OGLI_POSTED = 'N';
+
+Verify Data in Target Table
+-- Check data in APPS.GL_INTERFACE@JICOFPROD.COM
+SELECT * FROM APPS.GL_INTERFACE@JICOFPROD.COM WHERE <conditions>;
+
+Test Database Link
+-- Test database link
+SELECT 1 FROM DUAL@JICOFPROD.COM;
+
+
+
+
+
+

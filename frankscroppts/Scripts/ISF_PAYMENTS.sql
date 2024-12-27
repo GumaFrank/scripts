@@ -1,0 +1,58 @@
+select *
+from XXJICUG_AP_SUPPLIER_STG@JICOFPROD.COM;
+
+describe XXJICUG_AP_SUPPLIER_STG@JICOFPROD.COM
+
+
+select LEGACY_REF1 ,pay_group,a.* from  XXJICUG_AP_SUPPLIER_STG@JICOFPROD.COM a where pay_group like '%LIFE%';
+
+SELECT * FROM  apps.XXJIC_AP_SUPPLIER_MAP@JICOFPROD.COM  WHERE PIN_no='XUGL117877I';
+
+select *
+from Gnmm_Company_Master  
+where V_COMPANY_CODE = 'JICU'
+and V_COMPANY_BRANCH = 'HO';
+
+JICU-HO
+
+V_REGN_NO  -- For TIN Number
+
+
+DESCRIBE Gnmm_Company_Master;
+
+select LEGACY_REF1 ,pay_group,a.*
+from XXJICUG_AP_SUPPLIER_STG@JICOFPROD.COM  a
+ where pay_group like '%LIFE%'
+ and LEGACY_REF1 like '%I';
+ 
+ 117877;
+ 
+ 
+ select *
+ from Gnmt_Customer_Master 
+ where N_CUST_REF_NO = 117877;
+ 
+ JHL_OFA_UTILS.CREATE_INDIVIDUAL_SUPPLIER_NEW  ;
+ 
+ select *
+ from GNDT_CUSTOMER_IDENTIFICATION
+  where V_IDEN_CODE = 'PIN';
+   N_CUST_REF_NO = 117877;
+   
+   
+   
+   select *
+   from JHL_OFA_PYMT_TRANSACTIONS 
+   ORDER BY V_VOU_DATE DESC; 
+   
+   XUGL45178I
+   45178
+   TWINOMUJUNI ANNAH
+   
+   
+SELECT * FROM  apps.XXJIC_AP_SUPPLIER_MAP@JICOFPROD.COM  WHERE PIN_no='XUGL117877I';
+
+SELECT * FROM VENDOR_NAME, PIN_NO  apps.XXJIC_AP_SUPPLIER_MAP@JICOFPROD.COM  WHERE LEGACY_ENTITY_ID IN (  
+ select  N_CUST_REF_NO 
+ from Gnmt_Customer_Master 
+ where N_CUST_REF_NO = 117877

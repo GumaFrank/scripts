@@ -1,0 +1,14 @@
+select *from gnmm_batch_list where n_batch_no in (47,47.2) order by 1; --47,47.2
+select *from gnmt_batch_exe_trace where n_batch_no = 47 order by 1 desc;
+select *from gnmt_batch_exe_trace where n_batch_no = 47.2 order by 1 desc;
+select sum(n_comm_amt) from ammt_pol_comm_detail where v_comm_status = 'UP'
+and trunc(d_comm_gen) <= trunc(sysdate)-1; --14 954 597.93
+select *from am_error_log where v_err_code like '%20603%' order by v_trans_date desc;
+select *from ammm_agent_master where n_agent_no = 23;
+select *from amdt_agent_benefit_pool_detail where n_agent_no = 23 order by 1 desc;
+select *from ammt_agent_lob where n_agent_no = 23;
+select bfn_get_agent_code(23) from dual;--A0000019
+select *from ammt_pol_comm_detail where n_agent_no = 23 order by n_comm_seq desc;
+select *from amdt_agent_production_history where n_agent_no = 23 and v_line_of_business = 'LOB003' order by v_source_ref_no desc;
+select *from gnmm_req_repos_Master where v_ssr_cr_no = 'TKT_10883_289';
+

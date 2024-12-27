@@ -1,0 +1,20 @@
+"REM WORKSPACETAB0",Query1,,1
+UI202100657625
+"REM WORKSPACETAB1",Query2,,16
+select n_term,n_prem_pay_term,d_prem_paying_end_date,v_plan_code,n_net_contribution,d_prem_due_date,d_policy_end_date,
+d_next_out_date,d_commencement,v_cntr_stat_code,v_cntr_prem_stat_code,a.* from gnmt_policy a
+where v_policy_no='UI202100657625';
+select v_cntr_stat_code,v_cntr_prem_stat_code from GNMT_POLICY_DETAIL  where v_policy_no='UI202100657625' ;
+select * from gndt_bill_ind_dets  where v_policy_no='UI202100657625' and V_BILL_NO='DN2603080';
+select v_bill_no,d_prem_due_date,v_rec_status,sum(n_amt_called) from gndt_bill_ind_dets  where v_policy_no='UI202100657625' and v_rec_status<>'R'
+group by v_bill_no,d_prem_due_date,v_rec_status order by d_prem_due_date;
+select  sum(n_amt_called) from gndt_bill_ind_dets  where v_policy_no='UI202100657625' and v_rec_status<>'R';
+select  sum(n_receipt_amt) from remt_receipt  where v_policy_no='UI202100657625' and v_receipt_table='DETAIL'  and v_receipt_status='RE001';--60150
+select 12000000-(1000000*4)*3,3000000+313194 from dual;
+select * from ppmt_overshort_payment where  v_policy_no='UI202100657625';
+select * from ppdt_overshort_payment_det where  v_policy_no='UI202100657625' order by d_lastupd_inftim;
+select * from GNMT_POLICY_RIDERS where  v_policy_no='IL201701215306';
+select * from ppmt_outstanding_premium where  v_policy_no='IL201701215306' and v_status<>'R';
+select * from PPDT_OUTS_PREMIUM_INDIVIDUALS where  v_policy_no='IL201701215306' and v_status<>'R' oRDER bY  1;
+select * from PPDT_OUTS_PREMIUM_COMPANIES where  v_policy_no='IL201701215306' and v_status<>'R';
+"REM WORKSPACETAB2",Query3,,0

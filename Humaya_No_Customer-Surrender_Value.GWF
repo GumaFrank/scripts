@@ -1,0 +1,66 @@
+"REM WORKSPACETAB0",Query1,,22
+BEGIN
+   bpg_grplife_billing.grp_appropriate_over_short('UI202000582265',1,,'O','HQ230005191','RECEIPT',sysdate,user,'JHLU_171');   
+
+   bpg_grplife_billing.bpc_raise_first_bill(  'UI202000582265',
+                                     'PB',
+                                    USER,
+                                    'JHLU_171',
+                                    SYSDATE,
+                                    NULL,
+                                    'N',
+                                    'G');
+ 
+  bpg_grplife_billing.put_overpayment_in_holding(USER,
+                        'JHLU_171',
+                        trunc(sysdate),
+                        'UI202000582265');
+ 
+  bpg_grplife_billing.knock_dn_from_receipt_holding(USER,
+                        'JHLU_171',
+                        trunc(sysdate),
+                        'UI202000582265');
+END;
+"REM WORKSPACETAB1",Query4,,26
+BEGIN
+update gndt_bill_ind_dets set v_rec_status='R' WHERE V_POLICY_NO='UI202000582265' AND  V_BILL_NO LIKE 'CN%' AND V_REC_STATUS<>'R';
+UPDATE GNDT_BILL_IND_DETS SET V_REC_STATUS='R' WHERE V_POLICY_NO='UI202000582265'
+AND V_BILL_NO IN ('DN2273464','DN2273457','DN2273448','DN2273447','DN2273452','DN2273451') AND V_REC_STATUS='Y';
+ 
+   bpg_grplife_billing.grp_appropriate_over_short('UI202000582265',1,1012728,'O','DEP406035','DEP',sysdate,user,'JHLU_171');
+ 
+   bpg_grplife_billing.bpc_raise_first_bill('UI202000582265',
+                                     'PB',
+                                    USER,
+                                    'JHLU_171',
+                                    TO_DATE('04/11/2025','DD/MM/YYYY'),
+                                    NULL,
+                                    'N',
+                                    'G');
+ 
+  bpg_grplife_billing.put_overpayment_in_holding(USER,
+                        'JHLU_171',
+                        trunc(sysdate),
+                        'UI202000582265');
+ 
+  bpg_grplife_billing.knock_dn_from_receipt_holding(USER,
+                        'JHLU_171',
+                        trunc(sysdate),
+                        'UI202000582265');
+END;
+"REM WORKSPACETAB2",Query2,,14
+select n_term,n_prem_pay_term,d_prem_paying_end_date,v_plan_code,n_net_contribution,d_prem_due_date,d_policy_end_date,d_next_out_date,d_commencement,v_cntr_stat_code,v_cntr_prem_stat_code,a.* from gnmt_policy a
+where v_policy_no='UI202000582265';
+select * from gndt_bill_ind_dets  where v_policy_no='UI202000582265' and v_rec_status<>'R';
+select v_bill_no,d_prem_due_date,v_rec_status,sum(n_amt_called) from gndt_bill_ind_dets  where v_policy_no='UI202000582265' and v_rec_status<>'R'
+group by v_bill_no,d_prem_due_date,v_rec_status order by d_prem_due_date;
+select  sum(n_amt_called) from gndt_bill_ind_dets  where v_policy_no='UI202000582265' and v_rec_status='Y';
+select  sum(n_receipt_amt) from remt_receipt  where v_policy_no='UI202000582265' and v_receipt_table='DETAIL'  and v_receipt_status='RE001';--60150
+select 3600000/99981,99981*36,11*99981,(684+1099791)-87747,3600000-3599316  from dual; --1012044
+select * from ppmt_overshort_payment where  v_policy_no='UI202000582265';
+select * from ppdt_overshort_payment_det where  v_policy_no='UI202000582265' order by d_lastupd_inftim;
+select * from GNMT_POLICY_RIDERS where  v_policy_no='UI202000582265';
+select * from ppmt_outstanding_premium where  v_policy_no='UI202000582265' and v_status<>'R';
+select * from PPDT_OUTS_PREMIUM_INDIVIDUALS where  v_policy_no='UI202000582265' and v_status<>'R' oRDER bY  1;
+select * from PPDT_OUTS_PREMIUM_COMPANIES where  v_policy_no='UI202000582265' and v_status<>'R';
+"REM WORKSPACETAB3",Query3,,0

@@ -1,0 +1,62 @@
+"REM WORKSPACETAB0",Query1,,7
+STANDARD CHARTERED BANK UGANDA
+
+POLICY NO - UG202401106504
+
+AGENT CODE - A0003152
+
+DEBIT NOTE - DN2864804
+"REM WORKSPACETAB1",Query2,,21
+select *from gnmt_policy where v_policy_no = 'UG202401106504'; --BGTL001
+select *from ammt_commission_intimation where v_policy_no = 'UG202401106504' and v_plan_code = 'BGTL001'
+and v_comm_process_code in ('G','C') order by 1;
+select *from ammt_pol_comm_detail where v_policy_no = 'UG202401106504' and v_plan_code = 'BGTL001' order by n_comm_Seq; --BROC1
+select v_agent_code from ammm_agent_master where n_agent_no = 4442;--A0003152
+
+--2019012432
+select *from ammt_agent_benefit_pool where n_agent_no = 4442;
+select *from amdt_agent_benefit_pool_detail where n_agent_no = 4442 order by 1 desc;
+select *from amdt_agent_bene_pool_payment where n_agent_no = 4442 and n_voucher_no is not null order by 1 desc;
+--544130,544072
+select *from ammt_pol_comm_detail where n_comm_benefit_pool_seq_no = 544130 order by n_comm_Seq;  --Genrated transactions
+select  v_policy_no,v_receipt_no,sum(n_comm_amt) from ammt_pol_comm_detail where n_comm_benefit_pool_seq_no = 544130 group by v_policy_no,v_receipt_no;
+--UG202401106504	DEP412572	952666.12 positve
+select *from ammt_pol_comm_detail where n_comm_benefit_pool_seq_no = 544072 order by n_comm_Seq;  --Reversal transactions
+select  v_policy_no,v_receipt_no,sum(n_comm_amt) from ammt_pol_comm_detail where n_comm_benefit_pool_seq_no = 544072 group by v_policy_no,v_receipt_no;
+--UG201800376820	CN183011
+
+--UG202401228584	DEP411692	348277.19
+--UG201800376820	CN183011	-36133630.64
+
+"REM WORKSPACETAB2",Query3,,25
+--UG201700250802
+--A0000230
+--UG201700250802
+select *from gnmt_policy where v_policy_no = 'UG201700250802'; --BGTL001
+select *from ammt_commission_intimation where v_policy_no = 'UG201700250802' and v_plan_code = 'BGTL001'
+and v_comm_process_code in ('G','C') order by 1;
+select *from ammt_pol_comm_detail where v_policy_no = 'UG201700250802' and v_plan_code = 'BGTL001' order by n_comm_Seq; --BROC1
+select v_agent_code from ammm_agent_master where n_agent_no = 4442;--A0003152
+select *from ammm_agent_master where v_agent_code = 'A0000230';
+
+--2019012432
+select *from ammt_agent_benefit_pool where n_agent_no = 270;
+select *from amdt_agent_benefit_pool_detail where n_agent_no = 270 order by 1 desc;
+select *from amdt_agent_bene_pool_payment where n_agent_no = 270 and n_voucher_no is not null order by 1 desc;
+--544130,544072
+select *from ammt_pol_comm_detail where n_comm_benefit_pool_seq_no = 544130 order by n_comm_Seq;  --Genrated transactions
+select  v_policy_no,v_receipt_no,sum(n_comm_amt) from ammt_pol_comm_detail where n_comm_benefit_pool_seq_no = 544130 group by v_policy_no,v_receipt_no;
+--UG202401106504	DEP412572	952666.12 positve
+select *from ammt_pol_comm_detail where n_comm_benefit_pool_seq_no = 544072 order by n_comm_Seq;  --Reversal transactions
+select  v_policy_no,v_receipt_no,sum(n_comm_amt) from ammt_pol_comm_detail where n_comm_benefit_pool_seq_no = 544072 group by v_policy_no,v_receipt_no;
+--UG201800376820	CN183011
+
+--UG202401228584	DEP411692	348277.19
+--UG201800376820	CN183011	-36133630.64
+
+"REM WORKSPACETAB3",Query5,,3
+select a.* from ammt_commission_intimation a where a.v_policy_no = 'UG201700250802'
+and not exists (select 1 from ammt_pol_comm_detail b where b.v_policy_no = a.v_policy_no and b.n_comm_intimation_seq = a.n_comm_intimation_seq)
+and a.v_comm_process_code in ('G','C') order by 1;
+"REM WORKSPACETAB4",Query4,,1
+select *from gnlu_prog_master where v_prog_id = 'PP_FRM_40';

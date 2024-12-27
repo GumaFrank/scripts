@@ -1,0 +1,10 @@
+UGANDA http://10.158.2.6:7001/jhl_core_policy_java_api_ug/swagger-ui/index.html#/
+ 
+KENYA
+http://10.158.2.6:7001/jhl_core_policy_java_api/swagger-ui/index.html#/
+ 
+TANZANIA
+ 
+http://10.80.52.191:7001/jhl_core_policy_java_api/swagger-ui/index.html#/
+ 
+ 

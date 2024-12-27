@@ -1,0 +1,31 @@
+Working with Fathima
+select * from AMDT_BREAKAWAY_BENEFIT_POL_DET;
+select tname from tab where tname like '%BENEFIT%';
+
+
+select * from GNMM_BATCH_LIST where  V_STATUS ='A' order by 1;
+select * from AMDT_AGENT_BENEFIT_POOL_DETAIL where N_AGENT_NO ='3102' order by 1 desc ;
+select * from AMMT_AGENT_BENEFIT_POOL where N_AGENT_NO ='3102';
+select * from AMDT_AG_COMM_PAID where N_AGENT_NO ='3102' order by D_START_DATE , D_END_DATE;
+
+
+
+select * from PSMT_LAPSE_EXCEPTION where V_POLICY_NO ='UG202200977440';
+select * from GNMT_BATCH_EXE_TRACE where N_BATCH_NO like '47%' order by 1 desc ;
+
+
+select * from GNMM_BATCH_LIST order by 1;
+
+select * from AMMT_POL_COMM_DETAIL WHERE V_POLICY_NO ='UG202200977440';
+
+
+NRBRK01
+SELECT * FROM  GNMT_BENEFICIAL_OWNER WHERE V_COMPANY_CODE ='NRBRK01'
+
+-- COMMIT
+23/05/2024
+
+
+select * from PSMT_LAPSE_EXCEPTION where V_POLICY_NO ='UI201900380264';
+
+ select * from  gnmt_policy_event_link where V_POLICY_NO ='UI201900380264';

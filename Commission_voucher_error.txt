@@ -1,0 +1,261 @@
+
+-- fixing Commission that does not show on the Physical Voucher Printing
+-- commission voucher generated but does not show on Physical Voucher Printing
+
+select *from ammt_agent_benefit_pool where n_agent_no = 4102;
+select *from amdt_agent_benefit_pool_detail where n_agent_no = 4102 order by 1 desc;  --1369617.41
+select *from amdt_Agent_bene_Pool_payment where n_agent_no = 2762 order by 1 desc; --1369617.41  2024006677
+
+select *from pymt_vou_master where v_vou_no in (select v_column1 from ammt_global_temp);
+select *from pydt_vou_details where v_vou_no = '2024006758';
+select *from gnmt_gl_master where v_docu_ref_no = '2024006758';
+select *from gndt_gL_details where n_ref_no in (32884033);
+
+--UPDATE amdt_agent_benefit_pool_detail
+--SET v_accounted = 'N'
+--WHERE n_benefit_Pool_pay_Seq
+
+-- Cancelling the Voucher
+
+DECLARE
+lv_voucher VARCHAR2(50);
+ln_ben_seq NUMBER;
+BEGIN
+FOR vou IN (SELECT DISTINCT v_Column1 from ammt_global_temp where v_column1 is not null) LOOP
+lv_voucher := vou.v_column1;
+FOR i IN (SELECT c.v_vou_no,c.v_vou_status FROM pymt_vou_master c
+			WHERE c.v_vou_status <> 'PY005'
+				AND c.v_vou_no = lv_voucher)
+LOOP
+
+  UPDATE pymt_vou_master SET v_vou_status ='PY007'
+  		WHERE v_vou_no =i.v_vou_no;
+
+  UPDATE pydt_voucher_payments
+  SET d_cancelled_date = trunc(SYSDATE), v_inst_status = 'C' ,v_can_cmf_status = 'Y'
+  WHERE v_vou_no = i.v_vou_no;
+
+  FOR k IN (SELECT v_vou_no FROM pymt_vou_master WHERE v_vou_no =i.v_vou_no) LOOP
+		Bpg_Payments_V2.insert_voucher_status_log(i.v_vou_no,'PY007',USER,USER,trunc(SYSDATE));
+  END LOOP;
+  bpg_payments_v2.bpc_voucher_accounting( 'A',i.v_vou_no,'R',USER,USER,SYSDATE,NULL,NULL,NULL,'CR',NULL,'N');
+
+  UPDATE Amdt_Agent_Bene_Pool_Payment
+  SET N_Voucher_No = NULL, D_Voucher_Date = NULL
+  WHERE N_Voucher_No = i.v_vou_no;
+END LOOP;
+END LOOP;
+END;
+
+
+-- recreating Creating the Voucher
+
+DECLARE
+ln_agent_no NUMBER;
+L_Agent_No NUMBER;
+Ct_Agent_Name varchar2(100);
+Lv_Vou_No varchar2(50);
+Lv_A VARCHAR2(1) := 'A';
+Lv_N VARCHAR2(1) := 'N';
+Lv_C VARCHAR2(1) := 'C';
+Lv_D VARCHAR2(1) := 'D';
+Ct_Pay_Type VARCHAR2(1);
+Ct_Vou_No VARCHAR2(50);
+Lv_Voucher VARCHAR2(50);
+Trans_Date DATE := trunc(SYSDATE);
+Lv_Cust_Ref VARCHAR2(100);
+Lv_Code VARCHAR2(100);
+Lv_Comp_Branch VARCHAR2(100);
+Lv_Deliver_Mthd VARCHAR2(1);
+        CURSOR Cr_Deliver_Mthd IS
+            SELECT V_Th_Cval
+              FROM Gnlu_Gen_Par
+             WHERE V_Parid = 'P_DEL_MTHD';
+BEGIN
+FOR agt IN (SELECT distinct n_agent_no FROM ammm_agent_master where v_agent_code in (select v_column1 from ammt_global_temp where v_Column1 is not null)) LOOP
+ln_agent_no := agt.n_agent_no;
+FOR Commpaid
+            IN (SELECT A.*,
+                       B.N_Cust_Ref_No,
+                       B.V_Agent_Type,
+                       B.N_Agent_No     Agtno,
+                       B.V_Comm_Bank_Branch_Code,
+                       B.V_Comm_Pymt_Method
+                  FROM Amdt_Agent_Bene_Pool_Payment A, Ammm_Agent_Master B
+                 WHERE     A.N_Agent_No = B.N_Agent_No
+                       AND B.V_Comm_Pay_Status_Flag = Lv_A
+                       AND A.N_Agent_No = NVL (ln_agent_no, A.N_Agent_No)
+                       AND N_Voucher_No IS NULL
+                       AND (   NVL (N_Net_Paid, 0) > 0
+                            OR NVL (N_Total_Dedns, 0) > 0))
+        LOOP
+            BEGIN
+                L_Agent_No := Commpaid.N_Agent_No;
+                Ct_Agent_Name := Bfn_Get_Agent_Name (Commpaid.Agtno);
+
+                IF     Commpaid.V_Bank_Code IS NOT NULL
+                   AND Commpaid.V_Account_Code IS NOT NULL
+                THEN
+                    Ct_Pay_Type := 'A';
+                ELSE
+                    Ct_Pay_Type := 'C';
+                END IF;
+
+                Bpg_Payments_V2.Insert_Root_Voucher (Ct_Vou_No,
+                                                     Trans_Date,
+                                                     'PY001',
+                                                     ln_agent_no,
+                                                     'COMMISSION',
+                                                     'AM',
+                                                     NULL,
+                                                     USER,
+                                                     USER,
+                                                     USER,
+                                                     SYSDATE,
+                                                     'C');
+
+                Bpg_Agency.Bpc_Get_Agent_Details (Commpaid.N_Agent_No,
+                                                  Lv_Cust_Ref,
+                                                  Lv_Code,
+                                                  Lv_Comp_Branch);
+
+                Bpg_Payments_V2.Insert_Policy_Client (
+                    Ct_Vou_No,
+                    Lv_Voucher,
+                    'AG',
+                    NULL,
+                    NULL,
+                    NVL (Commpaid.V_Agent_Type, 'I'),
+                    Lv_Cust_Ref,
+                    Lv_Code,
+                    Lv_Comp_Branch,
+                    Bpg_Currency.Get_Base_Currency,
+                    USER,
+                    USER,
+                    SYSDATE);
+
+                FOR Bene
+                    IN (SELECT V_Account_Code,
+                               DECODE (V_Credit_Debit_Flag,
+                                       Lv_C, Lv_D,
+                                       Lv_D, Lv_C)    Cr_Dr,
+                               N_Amount,
+                               V_Unit_Buz,
+                               V_Lob_Code,
+                               V_Par_Npar,
+                               N_Agent_No,
+                               V_Trans_Source_Code,
+                               V_Gl_Plan_Code,
+                               V_Gl_Target_Market
+                          FROM Amdt_Agent_Benefit_Pool_Detail
+                         WHERE     N_Benefit_Pool_Pay_Seq =
+                                   Commpaid.N_Benefit_Pool_Pay_Seq
+                               AND N_Benefit_Pool_Pay_Seq IS NOT NULL
+                               AND V_Account_Code IS NOT NULL)
+                LOOP
+                    UPDATE Amdt_Agent_Benefit_Pool_Detail
+                       SET V_Accounted = 'Y'
+                     WHERE     V_Account_Code IS NOT NULL
+                           AND N_Benefit_Pool_Pay_Seq =
+                               Commpaid.N_Benefit_Pool_Pay_Seq;
+
+                    Bpg_Payments_V2.Insert_Policy_Client_Dets (
+                        Ct_Vou_No,
+                        Lv_Voucher,
+                        Bene.V_Account_Code,
+                        Bene.Cr_Dr,
+                        Bene.N_Amount,
+                        USER,
+                        USER,
+                        Trans_Date,
+                        Bene.V_Unit_Buz,
+                        Bpg_Gen.Bfn_Get_Agent_Branch (Bene.N_Agent_No),
+                        Bene.V_Lob_Code,
+                        Bene.V_Par_Npar,
+                        Bpg_Baj_Accounting.Bfn_Channel_Ac_Code_For_Agent (
+                            Bene.N_Agent_No),
+                        Bene.V_Trans_Source_Code,
+                        'M',
+                        1,
+                        Bene.V_Gl_Plan_Code,
+                        Bene.V_Gl_Target_Market);
+                END LOOP;
+
+                IF Ct_Vou_No IS NOT NULL
+                THEN
+                    Bpg_Payments_V2.Create_Actual_Vouchers (Ct_Vou_No,
+                                                            'C',
+                                                            USER,
+                                                            USER,
+                                                            SYSDATE);
+                    Bpg_Payments_V2.Bpc_Voucher_Accounting ('R',
+                                                            Ct_Vou_No,
+                                                            'C',
+                                                            USER,
+                                                            USER,
+                                                            SYSDATE);
+
+                    FOR Vou IN (SELECT V_Vou_No
+                                  FROM Pydt_Voucher_Policy_Client
+                                 WHERE V_Main_Vou_No = Ct_Vou_No)
+                    LOOP
+                        Lv_Vou_No := Vou.V_Vou_No;
+
+                        IF Commpaid.V_Comm_Pymt_Method <> 'DIRECT'
+                        THEN
+                            OPEN Cr_Deliver_Mthd;
+
+                            FETCH Cr_Deliver_Mthd INTO Lv_Deliver_Mthd;
+
+                            CLOSE Cr_Deliver_Mthd;
+
+                            Bpg_Payments_V2.Insert_Payment_Details (
+                                P_Vou_No              => Vou.V_Vou_No,
+                                P_Inst_Type           => Commpaid.V_Comm_Pymt_Method,
+                                P_Inst_No             => NULL,
+                                P_Inst_Date           => NULL,
+                                P_Inst_Bank           => NULL,
+                                P_Inst_Branch         => NULL,
+                                P_Pay_Bank            => Commpaid.V_Bank_Code,
+                                P_Pay_Branch          =>
+                                    Commpaid.V_Comm_Bank_Branch_Code,
+                                P_Pay_Accno           => Commpaid.V_Account_Code,
+                                P_Amount              =>
+                                    NVL (Commpaid.N_Net_Paid, 0),
+                                P_User                => USER,
+                                P_Prog                => USER,
+                                P_Date                => SYSDATE,
+                                P_Acct_Type           => NULL,
+                                P_Lob_Account         => NULL,
+                                P_Business_Unit_Ind   => NULL,
+                                P_Par_Non_Par         => NULL,
+                                P_Delivery_Mtd        => Lv_Deliver_Mthd);
+                        END IF;
+                    END LOOP;
+                END IF;
+
+                UPDATE Amdt_Agent_Bene_Pool_Payment
+                   SET N_Voucher_No = Lv_Vou_No,
+                       D_Voucher_Date = Trans_Date,
+                       N_Total_Dedns = NVL (Commpaid.N_Total_Dedns, 0),
+                       N_Net_Paid =
+                           N_Gross_Amount - NVL (Commpaid.N_Total_Dedns, 0)
+                 WHERE     N_Agent_No = Commpaid.N_Agent_No
+                       AND N_Voucher_No IS NULL;
+
+                Ct_Agent_Name := NULL;
+
+                Ct_Pay_Type := 'C';
+            END;
+        END LOOP;
+END LOOP;
+END;
+
+
+
+--checking the Vouchers 
+
+select bfn_get_agent_code(n_agent_no) v_agent_code,n_agent_no,n_voucher_no,n_net_paid 
+from amdt_agent_bene_pool_payment where n_agent_no in (Select n_agent_no from ammm_agent_master
+where v_agent_code in (Select v_column1 from ammt_global_temp))
+and trunc(d_voucher_date) = trunc(sysdate);
